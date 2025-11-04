@@ -1,0 +1,153 @@
+/* ===== Reset y fondo ===== */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background: #565551;
+}
+
+/* ===== Sección hero / carrusel ===== */
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  transition: opacity 0.3s ease-out;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  background: #3a3131;
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 50%;
+  transition: opacity 0.4s ease;
+  display: block;
+  position: relative;
+  z-index: 1; /* por debajo de overlays */
+}
+
+.hero-img.fade {
+  opacity: 0;
+}
+
+/* ===== Degradado inferior hasta el caption ===== */
+.gradient-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: calc(100% - clamp(450px, 35vh, 500px));
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.95) 40%,
+    rgba(0, 0, 0, 0.85) 70%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ===== Etiqueta (tipo) ===== */
+.label-badge {
+  font-size: clamp(1.8rem, 6vw, 2.5rem);
+  padding: 12px 22px;
+  position: absolute;
+top: clamp(50px, 4vh, 110px);
+  left: clamp(40px, 10vw, 100px);
+  border-radius: 999px;
+  background: rgba(20, 20, 22, 0.68);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  z-index: 6;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+/* ===== Caption (título + descripción) ===== */
+.caption {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(140px, 8vh, 230px);
+  transform: translateX(-50%);
+  width: min(92vw, 1000px);
+  color: #fff;
+  text-align: center;
+  z-index: 20; /* por encima del overlay */
+  transition: opacity 0.4s ease;
+}
+
+.caption.fade { opacity: 0; }
+
+.caption-title {
+  margin: 0 0 8px 0;
+  font-size: clamp(1.4rem, 4.6vw, 2.6rem);
+  line-height: 1.15;
+  font-weight: 800;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.45);
+}
+
+.caption-desc {
+  margin: 0 auto;
+  max-width: 80ch;
+  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+  line-height: 1.55;
+  opacity: 0.92;
+  text-shadow: 0 1px 12px rgba(0,0,0,0.35);
+}
+
+/* ===== Áreas laterales clicables ===== */
+.hover-area {
+  position: absolute;
+  top: 0;
+  width: 11%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.hover-area.left  { left: 0; }
+.hover-area.right { right: 0; }
+
+/* ===== Flechas: solo opacidad, sin saltos ===== */
+.arrow {
+  background: none;
+  border: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);      
+  font-size: clamp(5rem, 12vw, 9rem); 
+  color: white;
+  user-select: none;
+  opacity: 0;                       /* ocultas por defecto */
+  text-shadow: 0 2px 14px rgba(0,0,0,0.55);
+  pointer-events: none;             /* el click lo gestiona .hover-area */
+  transition: opacity .25s ease;    /* solo opacidad */
+}
+
+.left-arrow  { left: 8%; }
+.right-arrow { right: 8%; }
+
+/* Mostrar flechas al pasar el mouse o enfocar con teclado */
+.hero-section:hover .arrow,
+.hover-area:focus-visible .arrow {
+  opacity: 1;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+  .hover-area { width: 20%; }
+  .caption-desc { padding: 0 8px; }
+
+  /* En pantallas táctiles sin hover, flechas siempre visibles */
+  @media (hover: none) and (pointer: coarse) {
+    .arrow {
+      opacity: 1;
+      transform: translateY(-50%);
+    }
+  }
+}

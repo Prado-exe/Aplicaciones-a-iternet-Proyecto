@@ -1,0 +1,124 @@
+.areas-principales-section {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 45px 10px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.areas-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.areas-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #232178;
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+.mas-areas-btn {
+  background: #232178;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 9px 28px;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(35,33,124,0.17);
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.mas-areas-btn:hover {
+  background: #3937b8;
+  outline: none;
+}
+
+.areas-cards-main {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 38px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.area-card {
+  background: #fff;
+  border: 2.5px solid #232178;
+  border-radius: 16px;
+  width: 240px;
+  padding: 18px 14px 16px 14px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 12px rgba(35,33,124,0.09);
+  transition: transform 0.21s, box-shadow 0.18s, border-color 0.13s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.area-card:hover {
+  transform: translateY(-7px) scale(1.05);
+  box-shadow: 0 10px 22px rgba(35,33,124,0.22);
+  border-color: #3937b8;
+  z-index: 7;
+}
+
+.area-img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(35,33,124,0.08);
+}
+
+.area-nombre {
+  color: #232178;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.2px;
+}
+
+.area-desc {
+  color: #333;
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.34;
+}
+
+/* Responsive */
+@media (max-width: 820px) {
+  .areas-cards-main {
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+  .area-card {
+    width: 96%;
+    max-width: 360px;
+  }
+  .areas-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .mas-areas-btn {
+    width: 100%;
+    max-width: 360px;
+  }
+}

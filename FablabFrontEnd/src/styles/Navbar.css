@@ -1,0 +1,178 @@
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100px;   /* altura mínima */
+  padding: 0 16px;
+  background: #181818;
+  box-shadow: 0 2px 5px rgba(0,0,0,.08);
+}
+
+
+.logo { 
+  display: inline-flex; 
+  align-items: center; 
+  margin-left: 0; 
+}
+
+.logo img { 
+  height: 70px; 
+  display: block; 
+}
+
+.menu-toggle {
+  display: none;
+  border: none;
+  background: transparent;
+  padding: 8px;
+  line-height: 0;
+  cursor: pointer;
+  border-radius: 10px;
+}
+.menu-toggle:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.navbar { display: flex; align-items: center; }
+.menu {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2.2vw, 28px);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.menu-item { position: relative; }
+
+.menu a,
+.menu .menu-parent {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  padding: 8px 6px;
+  border-radius: 8px;
+  transition: background-color .2s ease, color .2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.menu-parent {
+  background: transparent;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.menu a:hover,
+.menu a:focus-visible,
+.menu .menu-parent:hover,
+.menu .menu-parent:focus-visible {
+  background: rgba(255,255,255,0.15);
+  color:#fff;
+  outline: none;
+}
+
+.caret { font-size: 0.9em; opacity: .7; }
+
+.has-submenu > .submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  padding: 8px;
+  list-style: none;
+  display: none;
+  z-index: 50;
+}
+
+.has-submenu > .submenu::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 0; right: 0;
+  height: 8px;
+}
+
+.has-submenu:hover > .submenu,
+.has-submenu:focus-within > .submenu {
+  display: block;
+}
+
+.submenu li a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #222;
+}
+.submenu li a:hover,
+.submenu li a:focus-visible {
+  background: rgba(0,0,0,.06);
+}
+
+@media (max-width: 768px) {
+  .menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
+
+  .navbar {
+    position: absolute;
+    top: 70px; right: 0; left: 0;
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height .25s ease;
+    display: block;
+  }
+  .navbar.open { max-height: 75vh; }
+
+  .menu {
+    flex-direction: column;
+    gap: 0;
+    padding: 8px 0;
+  }
+
+  .menu-item { width: 100%; }
+
+  .menu-item > .menu-parent,
+  .menu-item > a {
+    width: 100%;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: 0;
+  }
+
+
+  .has-submenu:hover > .submenu,
+  .has-submenu:focus-within > .submenu {
+    display: none; 
+  }
+
+  .has-submenu > .submenu {
+    position: static;
+    display: none;
+    box-shadow: none;
+    border: 0;
+    border-top: 1px dashed rgba(0,0,0,.08);
+    border-radius: 0;
+    padding: 4px 0 8px;
+    background: #fafafa;
+  }
+  .has-submenu.open-sub > .submenu { display: block; }
+
+  .submenu li a { padding: 12px 20px; }
+
+  .has-submenu > .submenu::before { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar { transition: none; }
+}

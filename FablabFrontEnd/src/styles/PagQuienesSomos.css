@@ -1,0 +1,170 @@
+.quienes-somos-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  gap: 3rem;
+  min-height: calc(100vh - 80px);
+  background-color: #fdfdfd;
+}
+
+/* Separador */
+.separador {
+  width: 80%;
+  border: 0;
+  border-top: 2px solid #e0e0e0;
+  margin: 2rem 0;
+}
+
+/* Staff */
+.staff-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+}
+
+.staff-section h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.staff-grid {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.staff-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.staff-item img {
+  width: 200px;
+  height: 200px;
+  border-radius: 15px;
+  object-fit: cover;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.staff-item img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.staff-nombre {
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.staff-rol {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Quiénes Somos */
+.quienes-somos-texto {
+  max-width: 900px;
+  text-align: center;
+  opacity: 0;
+}
+
+.quienes-somos-texto h1 {
+  font-size: 3rem;
+  color: #222;
+  margin-bottom: 1rem;
+}
+
+.quienes-somos-texto p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #333;
+}
+
+/* Misión y Visión */
+.bloque-mision-vision {
+  display: flex;
+  gap: 2rem;
+  max-width: 1000px;
+  width: 100%;
+  align-items: center;
+  flex-wrap: nowrap;
+  opacity: 0;
+}
+
+.bloque-mision-vision .bloque-imagen {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.bloque-mision-vision .bloque-imagen img {
+  width: 100%;
+  max-width: 450px; /* imágenes más grandes */
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.bloque-mision-vision .bloque-texto {
+  flex: 1;
+}
+
+.bloque-mision-vision.mision .bloque-imagen { order: 1; }
+.bloque-mision-vision.mision .bloque-texto { order: 2; }
+
+.bloque-mision-vision.vision .bloque-imagen { order: 2; }
+.bloque-mision-vision.vision .bloque-texto { order: 1; }
+
+.bloque-texto h2 {
+  margin-bottom: 0.5rem;
+  color: #4f46e5;
+}
+
+.bloque-texto p {
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Animaciones */
+@keyframes fadeDown {
+  0% { opacity: 0; transform: translateY(-30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeLeft {
+  0% { opacity: 0; transform: translateX(-50px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeRight {
+  0% { opacity: 0; transform: translateX(50px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-fadeDown { animation: fadeDown 0.8s ease forwards; }
+.animate-fadeIn   { animation: fadeIn 0.8s ease forwards; animation-delay: 0.3s; }
+.animate-fadeLeft { animation: fadeLeft 0.8s ease forwards; animation-delay: 0.5s; }
+.animate-fadeRight{ animation: fadeRight 0.8s ease forwards; animation-delay: 0.5s; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .bloque-mision-vision {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .bloque-mision-vision .bloque-imagen img {
+    max-width: 100%;
+  }
+}
