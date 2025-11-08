@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/NavBar.css';
 import logo from '../assets/logo_test.png';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Navbar() {
-  const [open, setOpen] = useState(false);       
-  const [subOpen, setSubOpen] = useState(null);  
+  const [open, setOpen] = useState(false);
+  const [subOpen, setSubOpen] = useState(null);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Intentar recuperar el usuario del localStorage
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) setUser(JSON.parse(savedUser));
+
     const onResize = () => {
       if (window.innerWidth > 768) {
         setOpen(false);
@@ -33,14 +39,11 @@ function Navbar() {
     setSubOpen(null);
   };
 
-const isMobile = () => window.innerWidth <= 768;
-
-  
-const handleParentClick = (key) => {
-  if (window.innerWidth > 768) return; 
-  setSubOpen(prev => (prev === key ? null : key));
-};
-
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    navigate('/');
+  };
 
   return (
     <header className="header">
@@ -62,31 +65,31 @@ const handleParentClick = (key) => {
 
       <nav id="primary-navigation" className={`navbar ${open ? 'open' : ''}`}>
         <ul className="menu">
-          {/* INICIO */}
-          <li className="menu-item">
-            <Link to="/" className="menu-parent" onClick={handleLinkClick}>
-              Inicio
-            </Link>
-          </li>
-          {/* SOBRE NOSOTROS */}
-          <li className="menu-item">
-            <Link to="/pag-quienes-somos" className="menu-parent" onClick={handleLinkClick}>
-              Quiénes Somos
-            </Link>
-          </li>
-          {/* SERVICIOS */}
-          <li className="menu-item">
-            <Link to="/pag-servicios" className="menu-parent" onClick={handleLinkClick}>
-              Servicios
-            </Link>
-          </li>
-          {/* NOTICIAS */}
-          <li className="menu-item">
-            <Link to="/pag-noticiero" className="menu-parent" onClick={handleLinkClick}>
-              Eventos
-            </Link>
-          </li>
+          <li><Link to="/" onClick={handleLinkClick}>Inicio</Link></li>
+          <li><Link to="/pag-quienes-somos" onClick={handleLinkClick}>Quiénes Somos</Link></li>
+          <li><Link to="/pag-servicios" onClick={handleLinkClick}>Servicios</Link></li>
+          <li><Link to="/pag-noticiero" onClick={handleLinkClick}>Eventos</Link></li>
 
+          <li className="menu-item user-section">
+            {!user ? (
+              <button
+                className="btn-acceder"
+                onClick={() => navigate('/login')}
+              >
+                Acceder
+              </button>
+            ) : (
+              <div className="user-info">
+                <span className="user-name">{user.nombre.split(' ')[0]}</span>
+                <Link to="/mi-cuenta" className="user-account" onClick={handleLinkClick}>
+                  Mi cuenta
+                </Link>
+                <button className="btn-logout" onClick={handleLogout}>
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </li>
         </ul>
       </nav>
     </header>
