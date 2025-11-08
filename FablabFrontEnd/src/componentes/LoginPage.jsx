@@ -2,51 +2,46 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
 import loginImg from "../assets/fablab.png";
+import { handleLogin } from "../controllers/userController";
 
 
 function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  //inputs
+  const [correo, setEmail] = useState("");
+  const [contraseña, setPassword] = useState("");
   const navigate = useNavigate();
+  
+  //Funcion para validar
+  const onLogin = async (e) => {
+      e.preventDefault();
+      try {
+        await handleLogin({ correo, contraseña });
+        alert("Inicio de sesión exitoso");
+          navigate("/");
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch("http://localhost:3000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("✅ Inicio de sesión exitoso");
-        navigate("/");
-      } else {
-        alert(data.message || "Credenciales incorrectas");
+      } catch (err) {
+        alert(err.message || "Error al iniciar sesión");
       }
-    } catch (error) {
-      console.error("Error al iniciar sesión:", error);
-    }
-  };
+    };
 
   return (
     <div className="auth-split">
       <div className="auth-panel">
         <div className="glass-box">
           <h2>Iniciar Sesión</h2>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={onLogin}>
             <input
               type="email"
               placeholder="Correo electrónico"
-              value={email}
+              value={correo}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
             <input
               type="password"
               placeholder="Contraseña"
-              value={password}
+              value={contraseña}
               onChange={(e) => setPassword(e.target.value)}
               required
             />

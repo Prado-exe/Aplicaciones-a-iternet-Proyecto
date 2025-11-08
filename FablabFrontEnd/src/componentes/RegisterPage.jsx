@@ -2,59 +2,51 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
 import registerImg from "../assets/fablab.png";
+import { handleRegister } from "../controllers/userController";
 
 function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  //inputs
+  const [nombre, setName] = useState("");
+  const [correo, setEmail] = useState("");
+  const [contraseña, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  //Funcion para validar
+  const onRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:3000/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("✅ Registro exitoso. Ahora puedes iniciar sesión.");
-        navigate("/login");
-      } else {
-        alert(data.message || "Error al registrar usuario.");
-      }
-    } catch (error) {
-      console.error("Error al registrarse:", error);
+      await handleRegister({ nombre, correo, contraseña });
+      alert("Registro exitoso. Ahora puedes iniciar sesión.");
+    } catch (err) {
+      alert(err.message || "Error al registrar usuario");
     }
   };
+
 
   return (
     <div className="auth-split">
       <div className="auth-panel">
         <div className="glass-box">
           <h2>Crear Cuenta</h2>
-          <form onSubmit={handleRegister}>
+          <form onSubmit={onRegister}>
             <input
               type="text"
               placeholder="Nombre completo"
-              value={name}
+              value={nombre}
               onChange={(e) => setName(e.target.value)}
               required
             />
             <input
               type="email"
               placeholder="Correo electrónico"
-              value={email}
+              value={correo}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
             <input
               type="password"
               placeholder="Contraseña"
-              value={password}
+              value={contraseña}
               onChange={(e) => setPassword(e.target.value)}
               required
             />

@@ -12,8 +12,6 @@ import ProyectosSection from './componentes/ProyectosSection';
 import TalleresSection from './componentes/TalleresSection';
 import AreasSection from './componentes/AreasSection';
 import ImportantNews from './componentes/Noticiero';
-import TestRegistro from './componentes/TestApi';
-
 
 function App() {
   const [opacity, setOpacity] = useState(1);
@@ -52,11 +50,6 @@ function App() {
         <UniqueDivider variant="beam-center" thickness={10} />
         <ProyectosSection/>
       </section>
-    
-        <UniqueDivider variant="beam-center" thickness={10} />
-        <TestRegistro/>
-
-      
 
       <BtnVolverInicio />
 

@@ -40,7 +40,10 @@ function Navbar() {
   };
 
   const handleLogout = () => {
+    //Eliminamos token como usuario
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
+
     setUser(null);
     navigate('/');
   };
@@ -80,7 +83,7 @@ function Navbar() {
               </button>
             ) : (
               <div className="user-info">
-                <span className="user-name">{user.nombre.split(' ')[0]}</span>
+                <span className="user-name">{user.NombreUsuario.split(' ')[0]}</span>
                 <Link to="/mi-cuenta" className="user-account" onClick={handleLinkClick}>
                   Mi cuenta
                 </Link>
