@@ -176,3 +176,74 @@
 @media (prefers-reduced-motion: reduce) {
   .navbar { transition: none; }
 }
+
+
+
+/* BOTÓN ACCEDER */
+.btn-acceder {
+  background-color: #ffcc00;
+  color: #000;
+  font-weight: 600;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.btn-acceder:hover {
+  background-color: #ffd633;
+  transform: translateY(-1px);
+}
+
+/* === USUARIO ACCEDIDO === */
+.user-section {
+  display: flex;
+  align-items: center;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: #fff;
+  gap: 4px;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #ffcc00;
+}
+
+.user-account {
+  color: #fff;
+  font-size: 0.9em;
+  text-decoration: underline;
+}
+
+.btn-logout {
+  background: transparent;
+  color: #aaa;
+  border: none;
+  font-size: 0.8em;
+  cursor: pointer;
+  margin-top: 2px;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.btn-logout:hover {
+  color: #fff;
+}
+
+/* Adaptación móvil */
+@media (max-width: 768px) {
+  .user-info {
+    align-items: flex-start;
+    padding: 12px 16px;
+  }
+
+  .btn-acceder {
+    width: 100%;
+    margin: 8px 0;
+  }
+}
