@@ -179,12 +179,3 @@ Framework preset: Vite
 Output directory: dist
 
 👥 Equipo de desarrollo
-Rol	Integrante
-Líder de proyecto	Rodrigo Geraldo
-Desarrolladores	Matías Barra, Benjamín Chávez, Brayan Avalos, Valeria Milla
-Institución	Universidad de La Serena
-Año	2025
-📄 Licencia
-
-Proyecto académico para uso interno del FabLab ULS.
-No distribuido públicamente.
