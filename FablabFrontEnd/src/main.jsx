@@ -90,7 +90,6 @@ function Root() {
 
       {/* Componentes fijos en todas las vistas */}
       <BtnVolverInicio />
-      <Footer />
     </BrowserRouter>
   );
 }
