@@ -110,7 +110,10 @@ export default function CarruselMain() {
   const slide = slides[current];
 
   return (
-    <section className="relative h-[90vh] overflow-hidden" style={{ opacity }}>
+    <section
+      className="relative h-[90vh] overflow-hidden -mt-[1px]"
+      style={{ opacity }}
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.src}
@@ -128,8 +131,8 @@ export default function CarruselMain() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Degradado sutil con dorado */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-yellow-500/10"></div>
+      {/* Fondo degradado sin amarillo */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0b0b0f] via-black/40 to-transparent"></div>
 
       {/* Texto principal */}
       <motion.div

@@ -3,7 +3,7 @@ import Logo from "../assets/logo.png";
 
 export default function Footer() {
   return (
-    <footer className="relative bg-gradient-to-t from-black via-gray-900 to-gray-800 text-white backdrop-blur-sm">
+    <footer className="relative -mt-2 bg-gradient-to-t from-black via-gray-900 to-gray-800 text-white backdrop-blur-sm">
       {/* Línea dorada superior animada */}
       <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-400 animate-[pulse_3s_ease-in-out_infinite]" />
 

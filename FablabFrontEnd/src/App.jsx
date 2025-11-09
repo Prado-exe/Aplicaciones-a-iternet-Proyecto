@@ -1,60 +1,77 @@
-import { useState, useEffect } from 'react';
-import Navbar from './componentes/Navbar';
-import UniqueDivider from './componentes/UniqueDivider';
-import Carousel from './componentes/Carousel';
-import './styles/App.css';
-import Footer from './componentes/footbar';
-import BtnVolverInicio from './componentes/BtnVolverInicio';
-import CarruselMain from './componentes/CarruselMain';
-import EventosSection from './componentes/EventosSection';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import ProyectosSection from './componentes/ProyectosSection';
-import TalleresSection from './componentes/TalleresSection';
-import AreasSection from './componentes/AreasSection';
-import ImportantNews from './componentes/Noticiero';
+import { useState, useEffect } from "react";
+import Navbar from "./componentes/Navbar";
+import UniqueDivider from "./componentes/UniqueDivider";
+import Footer from "./componentes/footbar";
+import BtnVolverInicio from "./componentes/BtnVolverInicio";
+import CarruselMain from "./componentes/CarruselMain";
+import EventosSection from "./componentes/EventosSection";
+import ProyectosSection from "./componentes/ProyectosSection";
+import TalleresSection from "./componentes/TalleresSection";
+import AreasSection from "./componentes/AreasSection";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import "./styles/App.css";
 
 function App() {
   const [opacity, setOpacity] = useState(1);
 
   useEffect(() => {
-    function handleScroll() {
+    const handleScroll = () => {
       const scrollTop = window.scrollY;
-      const newOpacity = Math.max(1 - (scrollTop / 400)*0.6, 0);
+      const newOpacity = Math.max(1 - (scrollTop / 400) * 0.6, 0);
       setOpacity(newOpacity);
-    }
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <>
+      {/* 🔹 Navbar fija */}
       <Navbar />
-      <CarruselMain/>
-      <section className="talleres-section">
-        <UniqueDivider variant="beam-center" thickness={10} />
-        <TalleresSection/>
-      </section>
-      
-      <section className="areas-section">
-        <UniqueDivider variant="beam-center" thickness={10} />
-        <AreasSection/>
-      </section>
 
-      <section className="eventos-section">
-        <UniqueDivider variant="beam-center" thickness={10} />
-        <EventosSection />
-      </section>
- 
+      {/* 🔹 Ajuste de padding exacto para evitar corte del carrusel */}
+      <div className="pt-[88px] bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f]">
+        {/* 🔹 Carrusel principal */}
+        <CarruselMain style={{ opacity }} />
 
-      <section className="proyectos-section">
-        <UniqueDivider variant="beam-center" thickness={10} />
-        <ProyectosSection/>
-      </section>
+        {/* 🔸 Sección: Áreas de trabajo */}
+        <section className="bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] py-4">
+          <AreasSection />
+        </section>
 
-      <BtnVolverInicio />
+        <section className="bg-gradient-to-b from-[#0b0b0f] via-[#0d0d12] to-[#0b0b0f]">
+          <UniqueDivider />
+        </section>
 
-      <Footer />
+        {/* 🔸 Sección: Talleres destacados */}
+        <section className="bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] py-4">
+          <TalleresSection />
+        </section>
 
+        <section className="bg-gradient-to-b from-[#0b0b0f] via-[#0d0d12] to-[#0b0b0f]">
+          <UniqueDivider />
+        </section>
+
+        {/* 🔸 Sección: Próximos eventos */}
+        <section className="bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] py-4">
+          <EventosSection />
+        </section>
+
+        <section className="bg-gradient-to-b from-[#0b0b0f] via-[#0d0d12] to-[#0b0b0f]">
+          <UniqueDivider />
+        </section>
+
+        {/* 🔸 Sección: Proyectos novedosos */}
+        <section className="bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] py-4">
+          <ProyectosSection />
+        </section>
+
+        {/* 🔹 Botón volver arriba */}
+        <BtnVolverInicio />
+
+        {/* 🔹 Footer */}
+        <Footer />
+      </div>
     </>
   );
 }

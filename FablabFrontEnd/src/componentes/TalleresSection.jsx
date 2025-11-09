@@ -31,7 +31,7 @@ export default function TalleresSection() {
   };
 
   return (
-    <section className="relative py-20 bg-gradient-to-b from-gray-900 via-black to-gray-900 text-white overflow-hidden">
+    <section className="relative py-20 bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] text-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         {/* Encabezado */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-14">

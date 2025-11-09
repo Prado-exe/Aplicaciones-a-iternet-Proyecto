@@ -33,7 +33,7 @@ export default function AreasSection({ handleLinkClick }) {
   };
 
   return (
-    <section className="relative py-20 bg-gradient-to-b from-black via-gray-900 to-black text-white overflow-hidden">
+    <section className="relative py-20 bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] text-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         {/* Encabezado */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-14">

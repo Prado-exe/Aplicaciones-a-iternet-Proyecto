@@ -1,24 +1,33 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import './styles/index.css';
-import App from './App.jsx';
-import PagQuienesSomos from './componentes/PagQuienesSomos.jsx';
-import PagServicios from './componentes/PagServicios.jsx';
-import PagNoticiero from './componentes/PagNoticiero.jsx';
-import AuthPage from './componentes/AuthPage.jsx';
+import "./styles/index.css";
 
-// 🔹 Envolvemos tus rutas en un componente animado
+// 🔹 Páginas y componentes globales
+import Navbar from "./componentes/Navbar.jsx";
+import Footer from "./componentes/footbar.jsx";
+import BtnVolverInicio from "./componentes/BtnVolverInicio.jsx";
+import App from "./App.jsx";
+import PagQuienesSomos from "./componentes/PagQuienesSomos.jsx";
+import PagServicios from "./componentes/PagServicios.jsx";
+import PagNoticiero from "./componentes/PagNoticiero.jsx";
+import AuthPage from "./componentes/AuthPage.jsx";
+
+// 🔸 Componente para las transiciones entre páginas
 function AnimatedRoutes() {
   const location = useLocation();
 
-  // Transición más fluida y sin “temblores”
   const pageTransition = {
     initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -10 },
-    transition: { duration: 0.4, ease: "easeOut" }
+    transition: { duration: 0.4, ease: "easeOut" },
   };
 
   return (
@@ -49,7 +58,7 @@ function AnimatedRoutes() {
           }
         />
         <Route
-          path="/pag-Noticiero"
+          path="/pag-noticiero"
           element={
             <motion.div {...pageTransition}>
               <PagNoticiero />
@@ -69,16 +78,25 @@ function AnimatedRoutes() {
   );
 }
 
-// 🔹 Envolvemos todo con BrowserRouter
+// 🔹 Componente raíz con Navbar y Footer globales
 function Root() {
   return (
     <BrowserRouter>
+      {/* Navbar global (solo se carga una vez) */}
+      <Navbar />
+
+      {/* Rutas con animación */}
       <AnimatedRoutes />
+
+      {/* Componentes fijos en todas las vistas */}
+      <BtnVolverInicio />
+      <Footer />
     </BrowserRouter>
   );
 }
 
-createRoot(document.getElementById('root')).render(
+// 🔹 Render final
+createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Root />
   </StrictMode>
