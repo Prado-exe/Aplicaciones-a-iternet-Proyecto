@@ -6,7 +6,7 @@ import './styles/App.css';
 import Footer from './componentes/footbar';
 import BtnVolverInicio from './componentes/BtnVolverInicio';
 import CarruselMain from './componentes/CarruselMain';
-import EventosSection from './componentes/EventosSetion';
+import EventosSection from './componentes/EventosSection';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import ProyectosSection from './componentes/ProyectosSection';
 import TalleresSection from './componentes/TalleresSection';
@@ -42,7 +42,7 @@ function App() {
 
       <section className="eventos-section">
         <UniqueDivider variant="beam-center" thickness={10} />
-        <ImportantNews/>
+        <EventosSection />
       </section>
  
 
