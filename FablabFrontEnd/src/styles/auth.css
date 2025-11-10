@@ -1,0 +1,113 @@
+/* === Estructura general === */
+.auth-split {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #111, #1e1e1e);
+  overflow: hidden;
+}
+
+/* === Panel Izquierdo === */
+.auth-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+/* === Caja translúcida === */
+.glass-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  color: white;
+}
+
+/* === Inputs === */
+.glass-box input {
+  width: 100%;
+  padding: 0.9rem;
+  margin-top: 1rem;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1rem;
+  transition: background 0.3s, transform 0.1s;
+}
+
+.glass-box input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.02);
+}
+
+/* === Botón === */
+.glass-box button {
+  margin-top: 1.2rem;
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #ffd700, #ffb700);
+  border: none;
+  border-radius: 12px;
+  color: #222;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.glass-box button:hover {
+  background: linear-gradient(135deg, #ffb700, #ffd700);
+  transform: scale(1.05);
+}
+
+/* === Panel Derecho con Imagen === */
+.auth-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.9);
+  transition: transform 0.6s ease;
+}
+
+.auth-image img:hover {
+  transform: scale(1.05);
+}
+
+/* Capa semitransparente */
+.auth-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  z-index: 1;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .auth-split {
+    flex-direction: column;
+  }
+
+  .auth-image {
+    display: none;
+  }
+
+  .auth-panel {
+    flex: none;
+    min-height: 100vh;
+  }
+}

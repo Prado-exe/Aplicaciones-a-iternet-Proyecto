@@ -8,7 +8,6 @@
   box-sizing: border-box;
 }
 
-
 .eventos-header {
   width: 90%;
   max-width: 960px;
@@ -113,3 +112,4 @@
     text-align: center;
   }
 }
+  
