@@ -1,14 +1,14 @@
-import "../styles/UniqueDivider.css"; 
+import "../styles/UniqueDivider.css";
 
 export default function UniqueDivider({
-  variant = "gradient",           
+  variant = "gold",
   thickness = 2,
   className = "",
   style = {},
 }) {
   return (
     <div
-      className={`white-divider ${variant} ${className}`}
+      className={`unique-divider ${variant} ${className}`}
       style={{ "--thickness": `${thickness}px`, ...style }}
       aria-hidden="true"
     />

@@ -1,25 +1,102 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import './styles/index.css';
-import App from './App.jsx';
-import PagQuienesSomos from './componentes/PagQuienesSomos.jsx';
-import PagServicios from './componentes/PagServicios.jsx';
-import PagNoticiero from './componentes/PagNoticiero.jsx';
-import LoginPage from './componentes/LoginPage.jsx';
-import RegisterPage from './componentes/RegisterPage.jsx';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import "./styles/index.css";
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/pag-quienes-somos" element={<PagQuienesSomos />} />
-        <Route path="/pag-servicios" element={<PagServicios />} /> 
-        <Route path="/pag-Noticiero" element={<PagNoticiero />} /> 
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+// 🔹 Páginas y componentes globales
+import Navbar from "./componentes/Navbar.jsx";
+import Footer from "./componentes/footbar.jsx";
+import BtnVolverInicio from "./componentes/BtnVolverInicio.jsx";
+import App from "./App.jsx";
+import PagQuienesSomos from "./componentes/PagQuienesSomos.jsx";
+import PagServicios from "./componentes/PagServicios.jsx";
+import PagNoticiero from "./componentes/PagNoticiero.jsx";
+import AuthPage from "./componentes/AuthPage.jsx";
+
+// 🔸 Componente para las transiciones entre páginas
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  const pageTransition = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
+    transition: { duration: 0.4, ease: "easeOut" },
+  };
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route
+          path="/"
+          element={
+            <motion.div {...pageTransition}>
+              <App />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/pag-quienes-somos"
+          element={
+            <motion.div {...pageTransition}>
+              <PagQuienesSomos />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/pag-servicios"
+          element={
+            <motion.div {...pageTransition}>
+              <PagServicios />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/pag-noticiero"
+          element={
+            <motion.div {...pageTransition}>
+              <PagNoticiero />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/auth"
+          element={
+            <motion.div {...pageTransition}>
+              <AuthPage />
+            </motion.div>
+          }
+        />
       </Routes>
+    </AnimatePresence>
+  );
+}
+
+// 🔹 Componente raíz con Navbar y Footer globales
+function Root() {
+  return (
+    <BrowserRouter>
+      {/* Navbar global (solo se carga una vez) */}
+      <Navbar />
+
+      {/* Rutas con animación */}
+      <AnimatedRoutes />
+
+      {/* Componentes fijos en todas las vistas */}
+      <BtnVolverInicio />
     </BrowserRouter>
+  );
+}
+
+// 🔹 Render final
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <Root />
   </StrictMode>
 );

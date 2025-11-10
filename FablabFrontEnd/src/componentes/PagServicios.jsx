@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "./Navbar";
 import { Link } from "react-router-dom";
-import "../styles/PagServicios.css";
+import UniqueDivider from "./UniqueDivider";
 
 export default function PagServicios() {
   const bloques = [
@@ -43,38 +43,89 @@ export default function PagServicios() {
     },
   ];
 
+  // 🔸 Efecto de aparición al hacer scroll
+  useEffect(() => {
+    const cards = document.querySelectorAll(".fade-card");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add("show");
+        });
+      },
+      { threshold: 0.2 }
+    );
+    cards.forEach((card) => observer.observe(card));
+  }, []);
+
   return (
     <>
       <Navbar />
 
-      <main className="svcS">
-        <header className="svcS-header">
-          <h1>Servicios del FABLAB</h1>
-          <p>Equipamiento y acompañamiento para transformar tus ideas en prototipos reales.</p>
+      {/* 🔹 Fondo y margen superior */}
+      <main className="pt-24 bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] text-gray-200 min-h-screen">
+        {/* Encabezado */}
+        <header className="text-center py-16 px-4">
+          <h1 className="text-5xl font-extrabold text-yellow-400 mb-4 drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]">
+            Servicios del FABLAB
+          </h1>
+          <p className="text-gray-300 text-lg max-w-3xl mx-auto">
+            Equipamiento y acompañamiento para transformar tus ideas en prototipos reales.
+          </p>
         </header>
 
-        <div className="svcS-grid">
+        {/* Contenido */}
+        <div className="max-w-6xl mx-auto flex flex-col gap-24 px-6 pb-20">
           {bloques.map((b, i) => (
             <section
               key={b.id}
-              className={`svcS-row ${i % 2 ? "invert" : ""} animate-card`}
-              style={{ animationDelay: `${i * 0.3}s` }}
+              className={`fade-card opacity-0 transform ${
+                i % 2 ? "translate-x-20 md:flex-row-reverse" : "-translate-x-20"
+              } flex flex-col md:flex-row items-center gap-10 transition-all duration-[1200ms] ease-out
+              bg-[#0e0e12]/90 border border-yellow-500/10 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.1)] p-6`}
             >
-              <div className="svcS-info">
-                <h2 className="svcS-title">{b.titulo}</h2>
-                <p className="svcS-desc">{b.desc}</p>
-                <Link className="btn primary" to={`/reserva/${b.id}`}>
+              {/* Texto */}
+              <div className="flex-1">
+                <h2 className="text-3xl font-bold text-yellow-400 mb-4 drop-shadow-[0_0_10px_rgba(255,215,0,0.4)]">
+                  {b.titulo}
+                </h2>
+                <p className="text-gray-300 mb-6 leading-relaxed">{b.desc}</p>
+                <Link
+                  to={`/reserva/${b.id}`}
+                  className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-2 rounded-full shadow-lg transition-all duration-300 hover:scale-105"
+                >
                   Reservar una hora
                 </Link>
               </div>
 
-              <figure className="svcS-media" aria-hidden="true">
-                <img src={b.img} alt={b.titulo} loading="lazy" />
+              {/* Imagen */}
+              <figure className="flex-1 flex justify-center">
+                <img
+                  src={b.img}
+                  alt={b.titulo}
+                  loading="lazy"
+                  className="rounded-xl shadow-[0_0_30px_rgba(255,215,0,0.15)] hover:shadow-[0_0_40px_rgba(255,215,0,0.4)] transition-all duration-500"
+                />
               </figure>
             </section>
           ))}
+
+          <UniqueDivider />
+
+          <p className="text-gray-400 text-center italic">
+            “El conocimiento y la creatividad son los motores de la innovación.”
+          </p>
         </div>
       </main>
+
+      {/* 🔹 Animaciones personalizadas */}
+      <style>
+        {`
+          .fade-card.show {
+            opacity: 1 !important;
+            transform: translateX(0) !important;
+          }
+        `}
+      </style>
     </>
   );
 }

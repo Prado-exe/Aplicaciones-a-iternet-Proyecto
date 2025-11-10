@@ -1,21 +1,51 @@
 import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
-import Logo from '../assets/logo.png';
+import Logo from "../assets/logo.png";
 
-const Footer = () => (
-  <footer className="bg-gray-800 text-white py-8">
-    <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
-      <div className="mb-4 md:mb-0">
-        <div>
-          <img src={Logo} alt="Logo FABLAB" />  
+export default function Footer() {
+  return (
+    <footer className="relative -mt-2 bg-gradient-to-t from-black via-gray-900 to-gray-800 text-white backdrop-blur-sm">
+      {/* Línea dorada superior animada */}
+      <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-400 animate-[pulse_3s_ease-in-out_infinite]" />
+
+      {/* Contenedor principal */}
+      <div className="container mx-auto px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-8">
+        {/* Sección izquierda */}
+        <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-3">
+          <img
+            src={Logo}
+            alt="Logo FABLAB"
+            className="w-32 filter drop-shadow-[0_0_10px_rgba(255,215,0,0.3)] hover:drop-shadow-[0_0_15px_rgba(255,215,0,0.5)] transition duration-500"
+          />
+          <p className="text-gray-400 text-sm">
+            © 2025 FABLAB FIULS. Todos los derechos reservados.
+          </p>
         </div>
-        <p className="text-sm text-gray-400">© 2025 Todos los derechos reservados</p>
+
+        {/* Sección derecha - Redes sociales */}
+        <div className="flex space-x-8 text-2xl">
+          <a
+            href="#"
+            aria-label="Facebook"
+            className="text-gray-300 hover:text-yellow-400 hover:scale-110 transition-transform duration-300"
+          >
+            <FaFacebook />
+          </a>
+          <a
+            href="#"
+            aria-label="Twitter"
+            className="text-gray-300 hover:text-yellow-400 hover:scale-110 transition-transform duration-300"
+          >
+            <FaTwitter />
+          </a>
+          <a
+            href="#"
+            aria-label="Instagram"
+            className="text-gray-300 hover:text-yellow-400 hover:scale-110 transition-transform duration-300"
+          >
+            <FaInstagram />
+          </a>
+        </div>
       </div>
-      <div className="flex space-x-6">
-        <a href="#" aria-label="Facebook"><FaFacebook size={24} /></a>
-        <a href="#" aria-label="Twitter"><FaTwitter size={24} /></a>
-        <a href="#" aria-label="Instagram"><FaInstagram size={24} /></a>
-      </div>
-    </div>
-  </footer>
-);
-export default Footer;
+    </footer>
+  );
+}
