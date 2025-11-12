@@ -2,10 +2,23 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
+import { handleRegister, handleLogin } from "../controllers/userController"; // Ajusta según ruta real
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
+
+  // Campos para login
+  const [emailLogin, setEmailLogin] = useState("");
+  const [passwordLogin, setPasswordLogin] = useState("");
+
+  // Campos para register
+  const [nombre, setNombre] = useState("");
+  const [emailRegister, setEmailRegister] = useState("");
+  const [passwordRegister, setPasswordRegister] = useState("");
+
+  // Estado para mensajes de error
+  const [errorMessage, setErrorMessage] = useState("");
 
   const variants = {
     initial: { opacity: 0, y: 50 },
@@ -30,6 +43,38 @@ export default function AuthPage() {
     },
   };
 
+  async function onSubmitRegister(e) {
+    e.preventDefault();
+    setErrorMessage("");
+    try {
+      await handleRegister({
+        nombre,
+        correo: emailRegister,
+        contraseña: passwordRegister,
+      });
+      // Opcionalmente redirige o cambia a login tras registro
+      setIsLogin(true);
+      alert("Registro exitoso, por favor inicia sesión");
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  }
+
+  async function onSubmitLogin(e) {
+    e.preventDefault();
+    setErrorMessage("");
+    try {
+      await handleLogin({
+        correo: emailLogin,
+        contraseña: passwordLogin,
+      });
+      // Redirigir tras login exitoso
+      navigate("/"); // ejemplo a dashboard o ruta principal
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  }
+
   return (
     <AuthLayout title={isLogin ? "Iniciar Sesión" : "Crear Cuenta"}>
       <AnimatePresence mode="wait">
@@ -41,6 +86,7 @@ export default function AuthPage() {
             animate="animate"
             exit="exit"
             className="flex flex-col gap-4 w-[320px]"
+            onSubmit={onSubmitLogin}
           >
             <label className="text-gray-200 text-sm font-semibold">
               Correo electrónico
@@ -49,6 +95,8 @@ export default function AuthPage() {
               type="email"
               placeholder="Ingresa tu correo"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={emailLogin}
+              onChange={(e) => setEmailLogin(e.target.value)}
             />
 
             <label className="text-gray-200 text-sm font-semibold">
@@ -58,6 +106,8 @@ export default function AuthPage() {
               type="password"
               placeholder="Ingresa tu contraseña"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={passwordLogin}
+              onChange={(e) => setPasswordLogin(e.target.value)}
             />
 
             <button
@@ -66,6 +116,10 @@ export default function AuthPage() {
             >
               Ingresar
             </button>
+
+            {errorMessage && (
+              <p className="text-red-500 text-sm">{errorMessage}</p>
+            )}
 
             <p className="text-gray-300 mt-3 text-sm text-center">
               ¿No tienes una cuenta?{" "}
@@ -77,7 +131,6 @@ export default function AuthPage() {
               </span>
             </p>
 
-            {/* 🔹 Texto para volver al inicio */}
             <motion.p
               variants={fadeIn}
               initial="initial"
@@ -96,6 +149,7 @@ export default function AuthPage() {
             animate="animate"
             exit="exit"
             className="flex flex-col gap-4 w-[320px]"
+            onSubmit={onSubmitRegister}
           >
             <label className="text-gray-200 text-sm font-semibold">
               Nombre completo
@@ -104,6 +158,8 @@ export default function AuthPage() {
               type="text"
               placeholder="Ingresa tu nombre completo"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
             />
 
             <label className="text-gray-200 text-sm font-semibold">
@@ -113,6 +169,8 @@ export default function AuthPage() {
               type="email"
               placeholder="Ingresa tu correo"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={emailRegister}
+              onChange={(e) => setEmailRegister(e.target.value)}
             />
 
             <label className="text-gray-200 text-sm font-semibold">
@@ -122,6 +180,8 @@ export default function AuthPage() {
               type="password"
               placeholder="Crea una contraseña"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={passwordRegister}
+              onChange={(e) => setPasswordRegister(e.target.value)}
             />
 
             <button
@@ -130,6 +190,10 @@ export default function AuthPage() {
             >
               Registrarse
             </button>
+
+            {errorMessage && (
+              <p className="text-red-500 text-sm">{errorMessage}</p>
+            )}
 
             <p className="text-gray-300 mt-3 text-sm text-center">
               ¿Ya tienes cuenta?{" "}
@@ -141,7 +205,6 @@ export default function AuthPage() {
               </span>
             </p>
 
-            {/* 🔹 Texto para volver al inicio */}
             <motion.p
               variants={fadeIn}
               initial="initial"

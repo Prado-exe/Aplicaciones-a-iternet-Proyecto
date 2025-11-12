@@ -52,7 +52,7 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   console.log('=================================');
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`📡 Acepta peticiones de http://localhost:5173`);
+  console.log(`📡 Acepta peticiones de http://localhost:5174`);
   console.log(`⏰ ${new Date().toLocaleString()}`);
   console.log('=================================');
 });
