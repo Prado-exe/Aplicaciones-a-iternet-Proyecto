@@ -66,14 +66,8 @@ app.use((err, req, res, next) => {
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log('=================================');
-<<<<<<< Updated upstream
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log(`📡 Acepta peticiones de http://localhost:5173`);
   console.log(`⏰ ${new Date().toLocaleString()}`);
-=======
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`Acepta peticiones de http://localhost:5174`);
-  console.log(`${new Date().toLocaleString()}`);
->>>>>>> Stashed changes
   console.log('=================================');
 });
