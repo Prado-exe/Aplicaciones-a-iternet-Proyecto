@@ -2,39 +2,49 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs'); 
 
 const userSchema = new mongoose.Schema({
-  ID_Usuario: {
-    type: mongoose.Schema.Types.ObjectId,
-    default: () => new mongoose.Types.ObjectId(), //Usuario Unico 
-  },
-  TipoUsuario: { // 0: Básico, 1: Admin
+  TipoUsuario: { 
     type: Number,
-    default: 0,
+    enum: [1, 2, 3, 4], //Admin?
+    default: 1,  
+    required: [true, 'El tipo de usuario es requerido'],
   },
+
   NombreUsuario: {
     type: String,
-    trim: true, //Normalizar entradas (espacios)
+    required: [true, 'El nombre de usuario es requerido'],
+    trim: true,
+    minlength: [3, 'El nombre debe tener al menos 3 caracteres'],
+    maxlength: 100,
   },
+
   CorreoUsuario: {
     type: String,
     required: [true, 'El correo es requerido'],
-    unique: true,//Correo unico
-    lowercase: true, //Transformar a miniscula el campo
-    trim: true, //Normalizar entradas (espacios)
+    unique: true,     
+    lowercase: true,
+    trim: true,
+    match: [/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,'Debe ingresar un correo válido'],
   },
+
   ContraUsuario: {
     type: String,
     required: [true, 'La contraseña es requerida'],
+    minlength: [8, 'La contraseña debe tener al menos 8 caracteres'],
     select: false,
   },
-  //Referencias a otras Colecciones
+
+  // Referencias a otras colecciones (validator las acepta como items {} en array)
   Actividades: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Actividad' }],
   Solicitudes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Solicitud' }],
   Proyectos:   [{ type: mongoose.Schema.Types.ObjectId, ref: 'Proyecto' }],
 
-  FechaUltimaSesion: { type: Date, default: null },
+  FechaUltimaSesion: { 
+    type: Date,
+  },
+
   FechaCreacion: {
-    type: String,
-    default: () => new Date().toLocaleDateString('es-CL'),
+    type: Date,
+    default: Date.now,
   },
 });
 
@@ -46,4 +56,4 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('usuario', userSchema); //Nombre del modelo/Collecion de la bd
+module.exports = mongoose.model('Usuario', userSchema, 'Usuarios');

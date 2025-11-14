@@ -48,11 +48,32 @@ app.use((req, res) => {
   });
 });
 
+// Middleware global de manejo de errores
+app.use((err, req, res, next) => {
+  console.error("Error capturado:", err);
+
+  const status = err.status || 500;
+
+  res.status(status).json({
+    ok: false,
+    message: err.message || 'Error interno del servidor',
+    errors: err.errors || null,
+  });
+});
+
+
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log('=================================');
+<<<<<<< Updated upstream
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log(`📡 Acepta peticiones de http://localhost:5173`);
   console.log(`⏰ ${new Date().toLocaleString()}`);
+=======
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Acepta peticiones de http://localhost:5174`);
+  console.log(`${new Date().toLocaleString()}`);
+>>>>>>> Stashed changes
   console.log('=================================');
 });
