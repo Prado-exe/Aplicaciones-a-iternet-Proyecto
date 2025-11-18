@@ -18,6 +18,10 @@ import PagQuienesSomos from "./componentes/PagQuienesSomos.jsx";
 import PagServicios from "./componentes/PagServicios.jsx";
 import PagNoticiero from "./componentes/PagNoticiero.jsx";
 import AuthPage from "./componentes/AuthPage.jsx";
+import PagMiCuenta from "./componentes/PagMiCuenta.jsx";
+import PagMisProyectos from "./componentes/PagMisProyectos.jsx";
+import PagAdmin from "./componentes/PagAdmin.jsx";
+
 
 // 🔸 Componente para las transiciones entre páginas
 function AnimatedRoutes() {
@@ -70,6 +74,30 @@ function AnimatedRoutes() {
           element={
             <motion.div {...pageTransition}>
               <AuthPage />
+            </motion.div>
+          }
+        />
+                <Route
+          path="/mi-cuenta"
+          element={
+            <motion.div {...pageTransition}>
+              <PagMiCuenta />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/mis-proyectos"
+          element={
+            <motion.div {...pageTransition}>
+              <PagMisProyectos />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <motion.div {...pageTransition}>
+              <PagAdmin />
             </motion.div>
           }
         />
