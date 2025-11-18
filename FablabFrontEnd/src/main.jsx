@@ -8,6 +8,8 @@ import {
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import "./styles/index.css";
+import { AuthProvider } from "./context/AuthContext.jsx";
+
 
 // 🔹 Páginas y componentes globales
 import Navbar from "./componentes/Navbar.jsx";
@@ -82,14 +84,16 @@ function AnimatedRoutes() {
 function Root() {
   return (
     <BrowserRouter>
-      {/* Navbar global (solo se carga una vez) */}
-      <Navbar />
+      <AuthProvider>
+        {/* Navbar global (solo se carga una vez) */}
+        <Navbar />
 
-      {/* Rutas con animación */}
-      <AnimatedRoutes />
+        {/* Rutas con animación */}
+        <AnimatedRoutes />
 
-      {/* Componentes fijos en todas las vistas */}
-      <BtnVolverInicio />
+        {/* Componentes fijos en todas las vistas */}
+        <BtnVolverInicio />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

@@ -1,5 +1,5 @@
 //Logica y BD
-const Usuario = require('../models/user');
+const Usuario = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 

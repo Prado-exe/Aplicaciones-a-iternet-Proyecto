@@ -3,17 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import logo from '../assets/logo.png';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/Navbar.css'; // Puedes mantener estilos antiguos si hay animaciones globales
+import { useAuth } from "../context/AuthContext";
+
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();  
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) setUser(JSON.parse(savedUser));
-
     const handleScroll = () => setIsScrolled(window.scrollY > 30);
     const handleResize = () => { if (window.innerWidth > 768) setOpen(false); };
     const handleKey = (e) => { if (e.key === 'Escape') setOpen(false); };
@@ -29,10 +28,8 @@ export default function Navbar() {
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    setUser(null);
+  const handleLogout = () => { //Si deslogea
+    logout(); //Borramos user,token y limpiamos localstorage
     navigate('/');
   };
 
@@ -55,7 +52,7 @@ export default function Navbar() {
           <li><Link to="/pag-noticiero" className="hover:text-yellow-400 transition">Eventos</Link></li>
 
           {/* Si hay usuario logueado */}
-          {user ? (
+          {isAuthenticated ? (
             <li className="flex items-center gap-3">
               <span className="text-yellow-400 font-semibold">{user.NombreUsuario?.split(' ')[0]}</span>
               <Link to="/mi-cuenta" className="hover:text-yellow-400 transition">Mi cuenta</Link>
@@ -96,7 +93,7 @@ export default function Navbar() {
             <li><Link to="/pag-servicios" onClick={() => setOpen(false)}>Servicios</Link></li>
             <li><Link to="/pag-noticiero" onClick={() => setOpen(false)}>Eventos</Link></li>
 
-            {user ? (
+            {isAuthenticated ? (
               <>
                 <li><Link to="/mi-cuenta" onClick={() => setOpen(false)}>Mi cuenta</Link></li>
                 <li>

@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
   TipoUsuario: { 
     type: Number,
-    enum: [1, 2, 3, 4], //Admin?
+    enum: [1, 2, 3, 4], //
     default: 1,  
     required: [true, 'El tipo de usuario es requerido'],
   },
@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
 
-  // Referencias a otras colecciones (validator las acepta como items {} en array)
+  // Referencias a otras colecciones
   Actividades: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Actividad' }],
   Solicitudes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Solicitud' }],
   Proyectos:   [{ type: mongoose.Schema.Types.ObjectId, ref: 'Proyecto' }],

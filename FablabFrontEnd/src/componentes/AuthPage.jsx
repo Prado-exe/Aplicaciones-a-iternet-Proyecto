@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
 import { handleRegister, handleLogin } from "../controllers/userController"; 
+import { useAuth } from "../context/AuthContext";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
+  const { login } = useAuth(); 
 
   // Campos para login
   const [emailLogin, setEmailLogin] = useState("");
@@ -47,33 +49,37 @@ export default function AuthPage() {
     e.preventDefault();
     setErrorMessage("");
     try {
-      await handleRegister({
+      const { user, token } = await handleRegister({
         nombre,
         correo: emailRegister,
         contraseña: passwordRegister,
       });
-      // Opcionalmente redirige o cambia a login tras registro
-      setIsLogin(true);
-      alert("Registro exitoso, por favor inicia sesión");
+
+      //AutoLogin
+      login(user, token);
+      navigate("/");
+
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(error.message || "Error al registrarse");
     }
   }
+
 
   async function onSubmitLogin(e) {
     e.preventDefault();
     setErrorMessage("");
     try {
-      await handleLogin({
+      const { user, token } = await handleLogin({
         correo: emailLogin,
         contraseña: passwordLogin,
       });
-      // Redirigir tras login exitoso
-      navigate("/"); // ejemplo a dashboard o ruta principal
+      login(user, token);
+      navigate("/");
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(error.message || "Error al iniciar sesión");
     }
   }
+
 
   return (
     <AuthLayout title={isLogin ? "Iniciar Sesión" : "Crear Cuenta"}>

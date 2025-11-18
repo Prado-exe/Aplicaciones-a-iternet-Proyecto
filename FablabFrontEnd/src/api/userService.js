@@ -25,3 +25,22 @@ export async function loginUser(credentials) {
   if (!res.ok) throw new Error(data.message || "Error al iniciar sesión");
   return data;
 }
+
+// Perfil usuario (ruta protegida)
+export async function getProfile(token) {
+  const res = await fetch(`${API_URL}/users/perfil`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, //Recuperar el token
+    },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || data.message || "Error al obtener perfil");
+  }
+
+  return data.data; 
+}
