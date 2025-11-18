@@ -61,8 +61,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-
-
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log('=================================');
