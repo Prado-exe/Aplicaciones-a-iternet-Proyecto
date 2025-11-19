@@ -1,148 +1,500 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import UniqueDivider from "./UniqueDivider";
+
+const LOCAL_KEY = "portfolioEntriesFabLab";
 
 const PagMisProyectos = () => {
   const [user, setUser] = useState(null);
-  const [projects, setProjects] = useState([]);
-  const [title, setTitle] = useState("");
-  const [file, setFile] = useState(null);
 
+  // Historial de registros en el FabLab (modo demo)
+  const [entries, setEntries] = useState([]);
+
+  // Proyecto seleccionado en el workspace
+  const [selectedId, setSelectedId] = useState(null);
+
+  // Formulario de nuevo registro
+  const [formData, setFormData] = useState({
+    titulo: "",
+    equipo: "",
+    integrantes: "",
+    tecnologias: "",
+    descripcion: "",
+  });
+
+  // Manejo simple de imágenes (URLs) para el registro nuevo
+  const [newImageUrl, setNewImageUrl] = useState("");
+  const [tempImages, setTempImages] = useState([]);
+
+  // Cargar usuario y registros guardados en localStorage (modo demo)
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
-    if (savedUser) setUser(JSON.parse(savedUser));
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
 
-    const savedProjects = localStorage.getItem("projects");
-    if (savedProjects) setProjects(JSON.parse(savedProjects));
+    const savedEntries = localStorage.getItem(LOCAL_KEY);
+    if (savedEntries) {
+      const parsed = JSON.parse(savedEntries);
+      setEntries(parsed);
+      if (parsed.length > 0) {
+        setSelectedId(parsed[0].id);
+      }
+    }
   }, []);
+
+  // Asegurar que siempre haya un seleccionado si existen entries
+  useEffect(() => {
+    if (entries.length > 0 && !selectedId) {
+      setSelectedId(entries[0].id);
+    }
+  }, [entries, selectedId]);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+  };
+
+  const handleAddImageUrl = () => {
+    const trimmed = newImageUrl.trim();
+    if (!trimmed) return;
+    setTempImages((prev) => [...prev, trimmed]);
+    setNewImageUrl("");
+  };
+
+  const handleRemoveTempImage = (url) => {
+    setTempImages((prev) => prev.filter((u) => u !== url));
+  };
+
+  const persistEntries = (list) => {
+    setEntries(list);
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(list));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || !file) return;
 
-    const newProject = {
+    if (!formData.titulo.trim()) return;
+
+    const now = new Date();
+    const newEntry = {
       id: Date.now(),
-      nombre: title,
-      archivoNombre: file.name,
-      fecha: new Date().toLocaleDateString(),
+      titulo: formData.titulo.trim(),
+      equipo: formData.equipo.trim(),
+      integrantes: formData.integrantes.trim(),
+      tecnologias: formData.tecnologias.trim(),
+      descripcion: formData.descripcion.trim(),
+      imagenes: tempImages,
+      fecha: now.toLocaleDateString(),
+      hora: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    const updated = [newProject, ...projects];
-    setProjects(updated);
-    localStorage.setItem("projects", JSON.stringify(updated));
+    const updated = [newEntry, ...entries];
+    persistEntries(updated);
+    setSelectedId(newEntry.id);
 
-    setTitle("");
-    setFile(null);
-    e.target.reset();
+    // Limpiar formulario
+    setFormData({
+      titulo: "",
+      equipo: "",
+      integrantes: "",
+      tecnologias: "",
+      descripcion: "",
+    });
+    setTempImages([]);
+    setNewImageUrl("");
+  };
+
+  const handleSelectEntry = (id) => {
+    setSelectedId(id);
+  };
+
+  const handleDeleteEntry = (id) => {
+    const filtered = entries.filter((e) => e.id !== id);
+    persistEntries(filtered);
+
+    if (filtered.length === 0) {
+      setSelectedId(null);
+    } else if (id === selectedId) {
+      setSelectedId(filtered[0].id);
+    }
   };
 
   if (!user) {
     return (
       <div className="pt-24 min-h-screen bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] flex items-center justify-center text-gray-200">
         <p className="text-lg">
-          No hay una sesión activa. Inicia sesión para gestionar tus proyectos.
+          No hay una sesión activa. Inicia sesión para gestionar tu historial en el FabLab.
         </p>
       </div>
     );
   }
 
+  const displayName =
+    user.Nickname ||
+    user.NombreUsuario ||
+    "Usuario";
+
+  const selectedEntry = entries.find((e) => e.id === selectedId) || null;
+
+  const detailVariants = {
+    hidden: { opacity: 0, x: 10 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.25, ease: "easeOut" },
+    },
+    exit: { opacity: 0, x: -10, transition: { duration: 0.2 } },
+  };
+
   return (
     <div className="pt-24 min-h-screen bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] text-gray-200">
       <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col gap-10">
-        {/* Título */}
+        {/* Título principal */}
         <header className="text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold text-yellow-400 mb-3 drop-shadow-[0_0_12px_rgba(255,215,0,0.7)]">
-            Mis Proyectos
+            Mi Portafolio en el FabLab
           </h1>
-          <p className="text-gray-300">
-            Registra y administra proyectos asociados al FabLab. Más adelante,
-            esta sección se conectará al backend para almacenamiento real.
+          <p className="text-gray-300 max-w-2xl mx-auto">
+            Registra las actividades y proyectos que realizas dentro del FabLab:
+            impresiones 3D, cortes láser, prototipos electrónicos, etc. Esta
+            sección funciona como tu historial personal de trabajo.
+          </p>
+          <p className="mt-2 text-xs text-gray-400">
+            Sesión activa como{" "}
+            <span className="text-yellow-300 font-semibold">
+              {displayName}
+            </span>
           </p>
         </header>
 
         <UniqueDivider />
 
-        {/* Formulario de registro */}
-        <section className="bg-gray-800/40 rounded-3xl p-6 md:p-8 shadow-[0_0_25px_rgba(255,215,0,0.18)]">
-          <h2 className="text-2xl font-semibold text-yellow-400 mb-4">
-            Registrar nuevo proyecto
-          </h2>
+        {/* 🔹 Panel grande con borde dorado que envuelve ambas columnas */}
+        <section className="bg-[#15151b] rounded-3xl p-4 md:p-6 border border-yellow-500/35 shadow-[0_0_25px_rgba(255,215,0,0.22)]">
+          <div className="grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] gap-6">
+            {/* Workspace / lista de registros */}
+            <div className="bg-[#101114] rounded-3xl p-5 md:p-6 border border-yellow-500/30 shadow-[0_0_18px_rgba(255,215,0,0.15)] flex flex-col">
+              <h2 className="text-xl font-semibold text-yellow-400 mb-3">
+                Historial de actividades
+              </h2>
+              <p className="text-xs text-gray-400 mb-4">
+                Selecciona un registro para ver el detalle. Al final de la lista
+                puedes crear uno nuevo.
+              </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm mb-1">
-                Nombre del proyecto
-              </label>
-              <input
-                type="text"
-                className="w-full rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/40 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ej: Prótesis 3D para mano"
-              />
+              {/* Lista scrollable (altura fija aprox. 6–7 items) */}
+              <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[430px]">
+                {entries.length === 0 ? (
+                  <p className="text-sm text-gray-300">
+                    Aún no tienes actividades registradas. Crea tu primer registro
+                    usando el formulario de abajo.
+                  </p>
+                ) : (
+                  entries.map((entry) => {
+                    const isActive = entry.id === selectedId;
+                    return (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        onClick={() => handleSelectEntry(entry.id)}
+                        className={`w-full text-left px-4 py-3 rounded-2xl border transition-all duration-300 flex flex-col gap-1 group transform ${
+                          isActive
+                            ? "bg-[#22222b] border-yellow-500 shadow-[0_0_18px_rgba(255,215,0,0.4)]"
+                            : "bg-[#1b1b21] border-yellow-500/25 hover:border-yellow-400 hover:shadow-[0_0_16px_rgba(255,215,0,0.35)] hover:-translate-y-[2px]"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold text-sm text-gray-100 truncate">
+                            {entry.titulo}
+                          </span>
+                          <span className="text-[11px] text-gray-400 whitespace-nowrap">
+                            {entry.fecha} · {entry.hora}
+                          </span>
+                        </div>
+                        {entry.equipo && (
+                          <p className="text-[11px] text-gray-400 truncate">
+                            Equipo:{" "}
+                            <span className="text-yellow-200">
+                              {entry.equipo}
+                            </span>
+                          </p>
+                        )}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Botón crear nuevo que hace scroll al formulario */}
+              <a
+                href="#nuevo-registro"
+                className="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-full bg-yellow-500 text-black text-sm font-semibold hover:bg-yellow-400 transition shadow-[0_0_12px_rgba(255,215,0,0.6)]"
+              >
+                + Nuevo registro
+              </a>
             </div>
 
-            <div>
-              <label className="block text-sm mb-1">
-                Archivo asociado (Word, PDF, etc.)
-              </label>
-              <input
-                type="file"
-                className="w-full text-sm text-yellow-100 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-400"
-                accept=".doc,.docx,.pdf"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
-            </div>
+            {/* Panel de detalle */}
+            <div className="bg-[#101114] rounded-3xl p-5 md:p-7 border border-yellow-500/25 shadow-[0_0_18px_rgba(255,215,0,0.15)]">
+              <h2 className="text-xl font-semibold text-yellow-400 mb-4">
+                Detalle de la actividad
+              </h2>
 
-            <button
-              type="submit"
-              className="bg-yellow-500 text-black font-semibold px-6 py-2 rounded-full hover:bg-yellow-400 transition"
-            >
-              Guardar proyecto
-            </button>
-          </form>
+              <AnimatePresence mode="wait">
+                {selectedEntry ? (
+                  <motion.div
+                    key={selectedEntry.id}
+                    variants={detailVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="space-y-4"
+                  >
+                    {/* Título */}
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-100">
+                        {selectedEntry.titulo}
+                      </h3>
+                      <p className="text-xs text-gray-400 mt-1">
+                        Registrado el{" "}
+                        <span className="text-yellow-200">
+                          {selectedEntry.fecha} · {selectedEntry.hora}
+                        </span>
+                      </p>
+                    </div>
+
+                    {/* Equipo e integrantes */}
+                    <div className="grid md:grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
+                          Equipo
+                        </p>
+                        <p className="text-gray-200">
+                          {selectedEntry.equipo || "—"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
+                          Integrantes
+                        </p>
+                        <p className="text-gray-200 whitespace-pre-line">
+                          {selectedEntry.integrantes || "—"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Tecnologías */}
+                    <div className="text-sm">
+                      <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
+                        Tecnologías / Equipos utilizados
+                      </p>
+                      <p className="text-gray-200 whitespace-pre-line">
+                        {selectedEntry.tecnologias || "—"}
+                      </p>
+                    </div>
+
+                    {/* Descripción */}
+                    <div className="text-sm">
+                      <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
+                        Descripción de la actividad
+                      </p>
+                      <p className="text-gray-200 whitespace-pre-line leading-relaxed">
+                        {selectedEntry.descripcion ||
+                          "Sin descripción registrada para esta actividad."}
+                      </p>
+                    </div>
+
+                    {/* Imágenes */}
+                    {selectedEntry.imagenes && selectedEntry.imagenes.length > 0 && (
+                      <div>
+                        <p className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                          Imágenes asociadas
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {selectedEntry.imagenes.map((url, idx) => (
+                            <div
+                              key={`${selectedEntry.id}-img-${idx}`}
+                              className="bg-[#1e1e24] rounded-xl overflow-hidden border border-yellow-500/30"
+                            >
+                              <img
+                                src={url}
+                                alt={`Imagen ${idx + 1}`}
+                                className="w-full h-28 object-cover"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Acciones sobre el registro */}
+                    <div className="pt-2 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteEntry(selectedEntry.id)}
+                        className="text-xs px-4 py-2 rounded-full border border-red-500/70 text-red-300 hover:bg-red-500/10 transition"
+                      >
+                        Eliminar registro (demo)
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.p
+                    key="no-selection"
+                    variants={detailVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="text-sm text-gray-300"
+                  >
+                    Selecciona un registro en la columna izquierda para ver el
+                    detalle, o crea uno nuevo usando el formulario de abajo.
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         </section>
 
         <UniqueDivider />
 
-        {/* Lista de proyectos */}
-        <section className="bg-gray-800/40 rounded-3xl p-6 md:p-8 shadow-[0_0_25px_rgba(255,215,0,0.18)]">
+        {/* Formulario para crear nuevo registro */}
+        <section
+          id="nuevo-registro"
+          className="bg-[#15151b] rounded-3xl p-6 md:p-8 border border-yellow-500/30 shadow-[0_0_22px_rgba(255,215,0,0.18)]"
+        >
           <h2 className="text-2xl font-semibold text-yellow-400 mb-4">
-            Proyectos registrados
+            Crear nuevo registro en tu portafolio
           </h2>
+          <p className="text-sm text-gray-300 mb-4">
+            Aquí puedes documentar una actividad específica que realizaste en el
+            FabLab: por ejemplo, una impresión 3D, un corte láser, una prueba de
+            prototipo, etc.
+          </p>
 
-          {projects.length === 0 ? (
-            <p className="text-sm text-gray-300">
-              Aún no has registrado proyectos. Cuando agregues uno, aparecerá en esta lista con su nombre, archivo asociado y fecha de registro.
-            </p>
-          ) : (
-            <ul className="space-y-3">
-              {projects.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex flex-col md:flex-row md:items-center md:justify-between bg-[#1e1e24] rounded-2xl px-4 py-3 border border-yellow-500/25"
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm mb-1">
+                Título de la actividad
+              </label>
+              <input
+                type="text"
+                value={formData.titulo}
+                onChange={handleChange("titulo")}
+                className="w-full rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/60 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                placeholder="Ej: Impresión 3D de pieza para robot"
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-1">
+                  Nombre del equipo (opcional)
+                </label>
+                <input
+                  type="text"
+                  value={formData.equipo}
+                  onChange={handleChange("equipo")}
+                  className="w-full rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/40 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  placeholder="Ej: Equipo FabLab ULS"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">
+                  Integrantes (separados por coma)
+                </label>
+                <input
+                  type="text"
+                  value={formData.integrantes}
+                  onChange={handleChange("integrantes")}
+                  className="w-full rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/40 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  placeholder="Ej: Rodrigo G., Matías B."
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1">
+                Tecnologías / Equipos utilizados
+              </label>
+              <textarea
+                value={formData.tecnologias}
+                onChange={handleChange("tecnologias")}
+                className="w-full rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/40 focus:outline-none focus:ring-2 focus:ring-yellow-500 min-h-[70px]"
+                placeholder="Ej: Impresora 3D Prusa, PLA, Cura, Arduino, etc."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1">
+                Descripción de la actividad
+              </label>
+              <textarea
+                value={formData.descripcion}
+                onChange={handleChange("descripcion")}
+                className="w-full rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/40 focus:outline-none focus:ring-2 focus:ring-yellow-500 min-h-[100px]"
+                placeholder="¿Qué hiciste? ¿Cuál era el objetivo? ¿Qué resultado obtuviste?"
+              />
+            </div>
+
+            {/* Imágenes (URLs por ahora, para que luego backend lo reemplace por uploads reales) */}
+            <div>
+              <label className="block text-sm mb-1">
+                Imágenes asociadas (URL) – modo demo
+              </label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={newImageUrl}
+                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  className="flex-1 rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/40 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
+                  placeholder="Pega aquí la URL de una imagen (ej: de Drive, Imgur, etc.)"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddImageUrl}
+                  className="px-4 py-2 rounded-full bg-yellow-500 text-black text-sm font-semibold hover:bg-yellow-400 transition shadow-[0_0_10px_rgba(255,215,0,0.6)]"
                 >
-                  <div>
-                    <p className="font-semibold text-gray-100">
-                      {p.nombre}
-                    </p>
-                    <p className="text-xs text-gray-300">
-                      Archivo:{" "}
-                      <span className="text-yellow-200">
-                        {p.archivoNombre}
-                      </span>{" "}
-                      · Registrado el {p.fecha}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className="mt-2 md:mt-0 text-sm bg-yellow-500 text-black px-4 py-1 rounded-full hover:bg-yellow-400"
-                  >
-                    Ver / Descargar (simulado)
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+                  Añadir imagen
+                </button>
+              </div>
+              {tempImages.length > 0 && (
+                <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {tempImages.map((url) => (
+                    <div
+                      key={url}
+                      className="relative bg-[#1e1e24] rounded-xl overflow-hidden border border-yellow-500/30"
+                    >
+                      <img
+                        src={url}
+                        alt="Preview"
+                        className="w-full h-24 object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTempImage(url)}
+                        className="absolute top-1 right-1 text-[10px] px-2 py-1 rounded-full bg-black/70 text-gray-200 hover:bg-black"
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="bg-yellow-500 text-black font-semibold px-6 py-2 rounded-full hover:bg-yellow-400 transition shadow-[0_0_12px_rgba(255,215,0,0.6)]"
+              >
+                Guardar registro (demo)
+              </button>
+            </div>
+          </form>
         </section>
       </div>
     </div>
