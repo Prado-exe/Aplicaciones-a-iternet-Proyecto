@@ -56,17 +56,28 @@ export default function AuthLayout({ title, children }) {
         style={{ backgroundImage: `url(${fablabTest})` }}
       ></div>
 
-      {/* Card principal: altura más grande en registro */}
+      {/* Card principal: cambia de altura y desliza contenido
+          login: formulario izq / carrusel der
+          registro: carrusel izq / formulario der */}
       <motion.div
         layout
         animate={{
-          height: isRegister ? 640 : 480,  // 🔹 aquí subimos la altura para registro
+          height: isRegister ? 640 : 480,
         }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
-        className="relative z-10 flex w-[950px] rounded-2xl overflow-hidden shadow-2xl bg-black/50 backdrop-blur-md border border-gray-700/40"
+        transition={{
+          duration: 0.4,
+          ease: "easeInOut",
+          layout: { duration: 0.5, ease: "easeInOut" }, // animación de deslizamiento
+        }}
+        className={`relative z-10 flex w-[950px] rounded-2xl overflow-hidden shadow-2xl bg-black/50 backdrop-blur-md border border-gray-700/40 ${
+          isRegister ? "flex-row-reverse" : "flex-row"
+        }`}
       >
-        {/* Panel izquierdo - formulario */}
-        <div className="flex-1 flex flex-col justify-center items-center p-10">
+        {/* Panel formulario (se mueve de lado con layout) */}
+        <motion.div
+          layout
+          className="flex-1 flex flex-col justify-center items-center p-10"
+        >
           <motion.h2
             key={title}
             variants={fadeUp}
@@ -95,10 +106,10 @@ export default function AuthLayout({ title, children }) {
           >
             {children}
           </motion.div>
-        </div>
+        </motion.div>
 
-        {/* Panel derecho - carrusel */}
-        <div className="flex-1 relative">
+        {/* Panel carrusel (también tiene layout para deslizarse) */}
+        <motion.div layout className="flex-1 relative">
           <motion.img
             key={current}
             src={images[current]}
@@ -109,7 +120,7 @@ export default function AuthLayout({ title, children }) {
             transition={{ duration: 1 }}
             className="absolute inset-0 w-full h-full object-cover"
           />
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );

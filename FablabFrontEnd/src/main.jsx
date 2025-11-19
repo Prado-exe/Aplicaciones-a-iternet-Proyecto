@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import {
   BrowserRouter,
@@ -22,6 +22,21 @@ import PagMiCuenta from "./componentes/PagMiCuenta.jsx";
 import PagMisProyectos from "./componentes/PagMisProyectos.jsx";
 import PagAdmin from "./componentes/PagAdmin.jsx";
 
+
+// 🔹 Componente que fuerza el scroll al inicio en cada cambio de ruta
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth", // si prefieres sin animación, cambia a "auto"
+    });
+  }, [pathname]);
+
+  return null;
+}
 
 // 🔸 Componente para las transiciones entre páginas
 function AnimatedRoutes() {
@@ -77,7 +92,7 @@ function AnimatedRoutes() {
             </motion.div>
           }
         />
-                <Route
+        <Route
           path="/mi-cuenta"
           element={
             <motion.div {...pageTransition}>
@@ -113,11 +128,16 @@ function Root() {
       {/* Navbar global (solo se carga una vez) */}
       <Navbar />
 
+      {/* 🔹 Forzar scroll al inicio en cada cambio de ruta */}
+      <ScrollToTop />
+
       {/* Rutas con animación */}
       <AnimatedRoutes />
 
       {/* Componentes fijos en todas las vistas */}
       <BtnVolverInicio />
+      {/* Si usas Footer global, lo puedes dejar aquí */}
+      {/* <Footer /> */}
     </BrowserRouter>
   );
 }

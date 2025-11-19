@@ -7,19 +7,22 @@ const slides = [
     src: "https://fablab.fiuls.cl/wp-content/uploads/2024/08/Grafica-Mousepad-FABLAB-1.png",
     tipo: "Eventos",
     titulo: "Jam de videojuegos",
-    descripcion: "Maratón creativa para diseñar y programar videojuegos en equipo",
+    descripcion:
+      "Maratón creativa para diseñar y programar videojuegos en equipo",
   },
   {
     src: "https://fablab.fiuls.cl/wp-content/uploads/2024/08/IMG_6160-scaled.jpg",
     tipo: "Servicios",
     titulo: "Impresora 3D",
-    descripcion: "Fabricación aditiva para prototipos funcionales y piezas personalizadas.",
+    descripcion:
+      "Fabricación aditiva para prototipos funcionales y piezas personalizadas.",
   },
   {
     src: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Cortadora_Laser_-_FabLAB_Newton.jpg",
     tipo: "Servicios",
     titulo: "Cortadora Láser",
-    descripcion: "Cortes de alta precisión para acrílico, MDF y más. Ideal para prototipos y maquetas.",
+    descripcion:
+      "Cortes de alta precisión para acrílico, MDF y más. Ideal para prototipos y maquetas.",
   },
 ];
 
@@ -131,8 +134,8 @@ export default function CarruselMain() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Fondo degradado sin amarillo */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0b0b0f] via-black/40 to-transparent"></div>
+      {/* 🔹 Sombra superior tipo barra, más arriba y menos invasiva */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[55%] bg-gradient-to-b from-black/85 via-black/40 to-transparent" />
 
       {/* Texto principal */}
       <motion.div
