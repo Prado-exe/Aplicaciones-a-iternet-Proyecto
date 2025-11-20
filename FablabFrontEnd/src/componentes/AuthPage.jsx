@@ -148,23 +148,7 @@ export default function AuthPage() {
               placeholder="Ingresa tu correo"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
             />
-
-            {/* Selector de rol */}
-            <label className="text-gray-200 text-sm font-semibold">
-              Rol en el FabLab
-            </label>
-            <select
-              name="rolUsuario"
-              defaultValue=""
-              className="p-3 rounded-md bg-gray-800/70 text-white text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
-            >
-              <option value="" disabled>
-                Selecciona tu rol
-              </option>
-              <option value="Alumno">Alumno</option>
-              <option value="Externo">Externo</option>
-            </select>
-
+            
             <label className="text-gray-200 text-sm font-semibold">
               Contraseña
             </label>

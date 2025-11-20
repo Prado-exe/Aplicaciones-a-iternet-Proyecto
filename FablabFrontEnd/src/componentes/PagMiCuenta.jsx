@@ -403,6 +403,14 @@ const PagMiCuenta = () => {
                   {user.TotalReservas ?? 0}
                 </span>
               </div>
+              <div className="px-4 py-2 rounded-full bg-[#2c2410] border border-yellow-500/60 text-sm">
+                <span className="block text-gray-300 text-xs">
+                  Eventos
+                </span>
+                <span className="block text-yellow-300 font-bold text-lg text-center">
+                  {user.TotalReservas ?? 0}
+                </span>
+              </div>
             </div>
           </div>
         </section>

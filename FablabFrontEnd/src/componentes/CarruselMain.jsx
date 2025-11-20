@@ -6,168 +6,203 @@ const slides = [
   {
     src: "https://fablab.fiuls.cl/wp-content/uploads/2024/08/Grafica-Mousepad-FABLAB-1.png",
     tipo: "Eventos",
-    titulo: "Jam de videojuegos",
+    titulo: "Jam de Videojuegos",
     descripcion:
-      "Maratón creativa para diseñar y programar videojuegos en equipo",
+      "Maratón creativa donde equipos desarrollan prototipos de videojuegos en pocos días.",
   },
   {
     src: "https://fablab.fiuls.cl/wp-content/uploads/2024/08/IMG_6160-scaled.jpg",
     tipo: "Servicios",
-    titulo: "Impresora 3D",
+    titulo: "Impresión 3D",
     descripcion:
-      "Fabricación aditiva para prototipos funcionales y piezas personalizadas.",
+      "Servicio de fabricación aditiva para prototipos funcionales y piezas personalizadas.",
   },
   {
     src: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Cortadora_Laser_-_FabLAB_Newton.jpg",
     tipo: "Servicios",
-    titulo: "Cortadora Láser",
+    titulo: "Corte Láser",
     descripcion:
-      "Cortes de alta precisión para acrílico, MDF y más. Ideal para prototipos y maquetas.",
+      "Cortes de alta precisión en acrílico, MDF y más. Ideal para prototipos y maquetas.",
   },
 ];
 
-function LazyImage({ src, alt, className }) {
-  const [isVisible, setIsVisible] = useState(false);
-  const imgRef = useRef();
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (imgRef.current) observer.observe(imgRef.current);
-
-    return () => {
-      if (imgRef.current) observer.unobserve(imgRef.current);
-    };
-  }, []);
-
-  return (
-    <img
-      ref={imgRef}
-      src={isVisible ? src : ""}
-      alt={alt}
-      className={className}
-      loading="lazy"
-    />
-  );
-}
-
-export default function CarruselMain() {
-  const [opacity, setOpacity] = useState(1);
+export default function CarruselMain({ style }) {
   const [current, setCurrent] = useState(0);
-  const [fade, setFade] = useState(false);
+  const [direction, setDirection] = useState(1);
   const intervalRef = useRef(null);
   const length = slides.length;
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const newOpacity = Math.max(1 - (scrollTop / 400) * 0.6, 0);
-      setOpacity(newOpacity);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const startAutoSlide = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
-      setFade(true);
-      setTimeout(() => {
-        setCurrent((prev) => (prev === length - 1 ? 0 : prev + 1));
-        setFade(false);
-      }, 400);
+      setDirection(1);
+      setCurrent((prev) => (prev + 1) % length);
     }, 6000);
   };
 
   useEffect(() => {
     startAutoSlide();
     return () => clearInterval(intervalRef.current);
-  }, [length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const prevSlide = () => {
-    setFade(true);
-    setTimeout(() => {
-      setCurrent((prev) => (prev === 0 ? length - 1 : prev - 1));
-      setFade(false);
-      startAutoSlide();
-    }, 400);
+    clearInterval(intervalRef.current);
+    setDirection(-1);
+    setCurrent((prev) => (prev - 1 + length) % length);
+    startAutoSlide();
   };
 
   const nextSlide = () => {
-    setFade(true);
-    setTimeout(() => {
-      setCurrent((prev) => (prev === length - 1 ? 0 : prev + 1));
-      setFade(false);
-      startAutoSlide();
-    }, 400);
+    clearInterval(intervalRef.current);
+    setDirection(1);
+    setCurrent((prev) => (prev + 1) % length);
+    startAutoSlide();
   };
 
-  const slide = slides[current];
+  const prevIndex = (current - 1 + length) % length;
+  const nextIndex = (current + 1) % length;
+
+  const centerVariants = {
+    enter: (dir) => ({
+      x: dir === 1 ? 90 : -90,
+      opacity: 0,
+      scale: 0.95,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1.08,
+    },
+    exit: (dir) => ({
+      x: dir === 1 ? -90 : 90,
+      opacity: 0,
+      scale: 0.95,
+    }),
+  };
 
   return (
     <section
-      className="relative h-[90vh] overflow-hidden -mt-[1px]"
-      style={{ opacity }}
+      className="relative h-[90vh] overflow-hidden -mt-[1px] bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f]"
+      style={style}
     >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={slide.src}
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.05 }}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
-          className="absolute inset-0"
-        >
-          <LazyImage
-            src={slide.src}
-            alt={slide.titulo || "Imagen principal"}
-            className="w-full h-full object-cover"
-          />
-        </motion.div>
-      </AnimatePresence>
-
-      {/* 🔹 Sombra superior tipo barra, más arriba y menos invasiva */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[55%] bg-gradient-to-b from-black/85 via-black/40 to-transparent" />
 
-      {/* Texto principal */}
-      <motion.div
-        key={slide.titulo}
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -40 }}
-        transition={{ duration: 0.8 }}
-        className="absolute bottom-28 left-10 text-white max-w-xl"
-      >
-        <span className="px-4 py-1 bg-yellow-400/90 text-black text-sm font-semibold rounded-full shadow-md uppercase tracking-wider">
-          {slide.tipo}
-        </span>
-        <h2 className="mt-4 text-5xl font-bold text-yellow-400 drop-shadow-lg">
-          {slide.titulo}
-        </h2>
-        <p className="text-gray-200 mt-2 text-lg">{slide.descripcion}</p>
-      </motion.div>
+      <div className="relative h-full flex flex-col items-center justify-center px-4">
+        <div className="relative w-full max-w-6xl h-[70vh] flex items-center justify-center">
+          {/* FLECHA IZQUIERDA */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-6 md:left-10 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center w-11 h-11 rounded-full border border-yellow-400/60 bg-black/60 text-yellow-300 hover:bg-yellow-400 hover:text-black shadow-[0_0_20px_rgba(250,204,21,0.6)] transition-all"
+            aria-label="Anterior"
+          >
+            <i className="bi bi-chevron-left text-2xl" />
+          </button>
 
-      {/* Flechas */}
-      <div
-        className="absolute left-6 top-1/2 -translate-y-1/2 cursor-pointer text-yellow-400 hover:text-yellow-300 text-5xl transition"
-        onClick={prevSlide}
-      >
-        <i className="bi bi-chevron-left drop-shadow-[0_0_10px_rgba(255,255,0,0.6)]"></i>
-      </div>
-      <div
-        className="absolute right-6 top-1/2 -translate-y-1/2 cursor-pointer text-yellow-400 hover:text-yellow-300 text-5xl transition"
-        onClick={nextSlide}
-      >
-        <i className="bi bi-chevron-right drop-shadow-[0_0_10px_rgba(255,255,0,0.6)]"></i>
+          {/* FLECHA DERECHA */}
+          <button
+            onClick={nextSlide}
+            className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center w-11 h-11 rounded-full border border-yellow-400/60 bg-black/60 text-yellow-300 hover:bg-yellow-400 hover:text-black shadow-[0_0_20px_rgba(250,204,21,0.6)] transition-all"
+            aria-label="Siguiente"
+          >
+            <i className="bi bi-chevron-right text-2xl" />
+          </button>
+
+          {/* GHOST IZQUIERDO – VISIBLE A LA IZQUIERDA */}
+          <div className="pointer-events-none absolute left-[-7vw] top-1/2 -translate-y-1/2 w-[40vw] max-w-2xl h-[40vw] max-h-[460px] rounded-[24px] overflow-hidden border border-yellow-400/35 bg-black shadow-[0_0_26px_rgba(250,204,21,0.35)] opacity-50 blur-[2px] scale-95 z-10"
+>
+            <div className="relative w-full h-full">
+              <img
+                src={slides[prevIndex].src}
+                alt={slides[prevIndex].titulo}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+              <div className="absolute bottom-4 left-5 right-5">
+                <span className="px-3 py-1 rounded-full bg-yellow-400 text-black text-[10px] font-semibold uppercase tracking-[0.18em] shadow-md">
+                  {slides[prevIndex].tipo}
+                </span>
+                <h3 className="mt-2 text-lg font-semibold text-yellow-300">
+                  {slides[prevIndex].titulo}
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          {/* GHOST DERECHO – VISIBLE A LA DERECHA */}
+          <div className="pointer-events-none absolute right-[-7vw] top-1/2 -translate-y-1/2 w-[40vw] max-w-2xl h-[40vw] max-h-[460px] rounded-[24px] overflow-hidden border border-yellow-400/35 bg-black shadow-[0_0_26px_rgba(250,204,21,0.35)] opacity-50 blur-[2px] scale-95 z-10">
+            <div className="relative w-full h-full">
+              <img
+                src={slides[nextIndex].src}
+                alt={slides[nextIndex].titulo}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+              <div className="absolute bottom-4 left-5 right-5">
+                <span className="px-3 py-1 rounded-full bg-yellow-400 text-black text-[10px] font-semibold uppercase tracking-[0.18em] shadow-md">
+                  {slides[nextIndex].tipo}
+                </span>
+                <h3 className="mt-2 text-lg font-semibold text-yellow-300">
+                  {slides[nextIndex].titulo}
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          {/* CARD CENTRAL – UN POCO MÁS ANGOSTA PARA DEJAR VER LOS LADOS */}
+          <AnimatePresence custom={direction} mode="wait">
+            <motion.div
+              key={current}
+              custom={direction}
+              variants={centerVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                duration: 0.55,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
+              className="relative w-[60vw] max-w-4xl h-[60vw] max-h-[500px] rounded-[32px] overflow-hidden border border-yellow-400/65 bg-black shadow-[0_0_70px_rgba(250,204,21,0.8)] z-20"
+            >
+              <div className="relative w-full h-full">
+                <img
+                  src={slides[current].src}
+                  alt={slides[current].titulo}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+
+                {/* halos */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.3),transparent_55%)] pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
+
+                {/* header */}
+                <div className="absolute top-5 left-6 right-6 flex justify-between items-start">
+                  <span className="px-4 py-1 rounded-full bg-yellow-400 text-black text-[11px] font-semibold uppercase tracking-[0.18em] shadow-md">
+                    {slides[current].tipo}
+                  </span>
+                  <span className="px-3 py-1 rounded-full border border-yellow-300/60 text-[11px] text-yellow-100/95 backdrop-blur-sm bg-black/60">
+                    FABLAB&nbsp;FIULS
+                  </span>
+                </div>
+
+                {/* texto principal */}
+                <div className="absolute bottom-6 left-6 right-6">
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-400 drop-shadow-[0_0_18px_rgba(250,204,21,0.8)]">
+                    {slides[current].titulo}
+                  </h2>
+                  <p className="mt-2 text-[13px] md:text-sm text-gray-100/95 max-w-xl">
+                    {slides[current].descripcion}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </section>
   );
 }
+  

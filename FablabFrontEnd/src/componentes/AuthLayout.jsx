@@ -49,7 +49,7 @@ export default function AuthLayout({ title, children }) {
   }, []);
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen overflow-hidden text-white">
+    <div className="relative flex items-center justify-center min-h-screen overflow-hidden text-white pt-19 md:pt:20">
       {/* Fondo fijo con blur y oscurecido */}
       <div
         className="absolute inset-0 bg-cover bg-center filter blur-lg brightness-75"
@@ -62,7 +62,7 @@ export default function AuthLayout({ title, children }) {
       <motion.div
         layout
         animate={{
-          height: isRegister ? 640 : 480,
+          height: isRegister ? 560 : 460,
         }}
         transition={{
           duration: 0.4,
@@ -76,7 +76,7 @@ export default function AuthLayout({ title, children }) {
         {/* Panel formulario (se mueve de lado con layout) */}
         <motion.div
           layout
-          className="flex-1 flex flex-col justify-center items-center p-10"
+          className="flex-1 flex flex-col justify-center items-center px-8 py-6"
         >
           <motion.h2
             key={title}
