@@ -2,6 +2,8 @@
 const Usuario = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Solicitudes = require('../models/Solicitudes');
+const Proyecto = require('../models/Proyecto');
 
 //Crear Usuario
 exports.createUser = async ({ NombreUsuario, CorreoUsuario, ContraUsuario }) => {
@@ -75,17 +77,144 @@ exports.login = async ({ CorreoUsuario, ContraUsuario }) => {
   return { token, user: safe };
 };
 
+
 //Obetener perfil usuario //
 exports.getProfile = async (userId) => {
-  const user = await Usuario
-    .findById(userId)
-    .select('-ContraUsuario -__v')
-    .lean();
+  const [user, ultimoProyecto, reservaReciente, totalProyectos, totalReservas] = await Promise.all([
+    Usuario.findById(userId)
+      .select('-ContraUsuario -__v')
+      .lean(),
+    Proyecto
+      .findOne({ IDR_Usuario: userId })        
+      .sort({ FechaCreacion: -1 })         
+      .select('NombreProyecto FechaCreacion')  
+      .lean(),
+    Solicitudes
+      .findOne({ IDR_Usuario: userId })        
+      .sort({ FechaReserva: -1 })          
+      .select('TipoSolicitud FechaReserva') 
+      .lean(),
+    Proyecto.countDocuments({ IDR_Usuario: userId }),     
+    Solicitudes.countDocuments({ IDR_Usuario: userId }),   
+  ]);
 
   if (!user) {
     const e = new Error('Usuario no encontrado');
     e.status = 404;
     throw e;
   }
-  return user;
+
+  return {
+    ...user,
+    UltimoProyecto: ultimoProyecto ? ultimoProyecto.NombreProyecto : null,
+    ReservaMasReciente: reservaReciente ? reservaReciente.TipoSolicitud : null,
+    TotalProyectos: totalProyectos,
+    TotalReservas: totalReservas,
+  };
+};
+
+
+//Actualizar perfil
+exports.updateProfile = async (userId, { nombre, nickname, correo }) => {
+  const updates = {};
+  //Actualizar nombres y Nicknames
+  if (nombre !== undefined) updates.NombreUsuario = nombre;
+  if (nickname !== undefined) updates.Nickname = nickname;
+
+
+  if (correo !== undefined) {
+    correo = correo.trim().toLowerCase();
+
+    // Validar correo único
+    const existe = await Usuario.findOne({
+      CorreoUsuario: correo,
+      _id: { $ne: userId },
+    }).lean();
+
+    if (existe) {
+      const e = new Error("El correo ya está registrado");
+      e.status = 409;
+      throw e;
+    }
+
+    updates.CorreoUsuario = correo;
+  }
+
+  try {
+    const user = await Usuario.findByIdAndUpdate(
+      userId,
+      updates,
+      {
+        new: true,
+        runValidators: true, // ✅ corre las validaciones del schema
+        context: "query",
+      }
+    )
+      .select("-ContraUsuario -__v")
+      .lean();
+
+    if (!user) {
+      const e = new Error("Usuario no encontrado");
+      e.status = 404;
+      throw e;
+    }
+
+    return user;
+  } catch (err) {
+    //Los errores del modelo
+    if (err.name === "ValidationError") {
+      const errores = Object.values(err.errors).map(x => ({
+        campo: x.path,
+        mensaje: x.message,
+      }));
+
+      const e = new Error(errores[0].mensaje);
+      e.status = 400;
+      e.errors = errores;
+      throw e;
+    }
+
+    throw err;
+  }
+};
+
+
+//Cambiar Password
+exports.changePassword = async (userId, { currentPassword, newPassword }) => {
+  if (!currentPassword || !newPassword) {
+    const e = new Error("Debes ingresar contraseña actual y nueva");
+    e.status = 400;
+    throw e;
+  }
+
+  // regla mínima
+  if (newPassword.length < 8) {
+    const e = new Error("La nueva contraseña debe tener al menos 8 caracteres");
+    e.status = 400;
+    throw e;
+  }
+
+  // traemos usuario con contraseña
+  const user = await Usuario.findById(userId).select("+ContraUsuario");
+  if (!user) {
+    const e = new Error("Usuario no encontrado");
+    e.status = 404;
+    throw e;
+  }
+
+  // verificar coincidencia entre nuevas contras
+  const ok = await bcrypt.compare(currentPassword, user.ContraUsuario);
+  if (!ok) {
+    const e = new Error("La contraseña actual no es correcta");
+    e.status = 401;
+    throw e;
+  }
+
+  //Guardar
+  user.ContraUsuario = newPassword;
+
+  //Guardar Cambios
+  await user.save(); 
+
+  return { message: "Contraseña actualizada correctamente" };
 };

@@ -26,7 +26,7 @@ export async function loginUser(credentials) {
   return data;
 }
 
-// Perfil usuario (ruta protegida)
+// obtener Perfil usuario 
 export async function getProfile(token) {
   const res = await fetch(`${API_URL}/users/perfil`, {
     method: "GET",
@@ -40,6 +40,46 @@ export async function getProfile(token) {
 
   if (!res.ok) {
     throw new Error(data.error || data.message || "Error al obtener perfil");
+  }
+
+  return data.data; 
+}
+
+//Actualizar el perfil de usuario
+export async function updateProfile(token, payload) {
+  const res = await fetch(`${API_URL}/users/perfil`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || data.message || "Error al actualizar perfil");
+  }
+
+  return data.data; // el usuario actualizado
+}
+
+//Actualizar Contraseña del usuario
+export async function changePassword(token, currentPassword, newPassword) {
+  const res = await fetch(`${API_URL}/users/cambiar-password`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || data.message || "Error al cambiar contraseña");
   }
 
   return data.data; 

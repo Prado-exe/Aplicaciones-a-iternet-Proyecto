@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import UniqueDivider from "./UniqueDivider";
+import { useAuth } from "../context/AuthContext";
+import { getProfile,updateProfile,changePassword} from "../api/userService";
+
 
 const PagMiCuenta = () => {
-  const [user, setUser] = useState(null);
+
+  const { user, token, isAuthenticated, updateUser } = useAuth();
+  const [profile, setProfile] = useState(user || null); // usuario completo
+  const [errorMessage, setErrorMessage] = useState("");//AGREGAR AL FRONT PARA MOSTRAR ERRORES DE VALIDACION EN LA ACTUALIZACION DEL PERFIL
 
   // ¿Está el panel en modo edición?
   const [isEditing, setIsEditing] = useState(false);
@@ -31,27 +37,37 @@ const PagMiCuenta = () => {
     next: false,
   });
 
-  // Cargar datos del usuario (de momento desde localStorage)
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      const parsed = JSON.parse(savedUser);
-      setUser(parsed);
+    // si no hay sesión o no hay token, no hacemos nada
+    if (!isAuthenticated || !token) return;
 
-      setFormData({
-        nombre: parsed.NombreUsuario || "",
-        nickname: parsed.Nickname || "",
-        correo: parsed.Correo || "",
-        // compatible con nombres de campo que pueda usar el backend
-        rolUsuario:
-          parsed.RolUsuario ||
-          parsed.RolUniversitario || // por si lo tenían así
-          "",
-      });
-    }
-  }, []);
+    const fetchPerfil = async () => {
+      try {
+        const data = await getProfile(token); // GET /users/perfil
+        
+        console.log("Perfil backend →", data);//Msj en consolar para ver info extraida
 
-  if (!user) {
+        setProfile(data);
+
+        setFormData({
+          nombre: data.NombreUsuario || "",
+          nickname: data.Nickname || "",
+          correo: data.CorreoUsuario || "",
+          rolUsuario:
+            data.TipoUsuario ||
+            data.RolUsuario ||
+            data.RolUniversitario ||
+            "",
+        });
+      } catch (err) {
+        console.error("Error al obtener perfil:", err);
+      }
+  };
+
+  fetchPerfil();
+  }, [isAuthenticated, token]);
+
+  if (!isAuthenticated || !profile) {
     return (
       <div className="pt-24 min-h-screen bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] flex items-center justify-center text-gray-200">
         <p className="text-lg">
@@ -66,7 +82,7 @@ const PagMiCuenta = () => {
     formData.nombre ||
     "Usuario";
 
-  const avatarUrl = user?.FotoPerfil || null;
+  const avatarUrl = profile?.FotoPerfil || null;
   const initial = displayName.charAt(0).toUpperCase();
   const rolUsuario = formData.rolUsuario || "";
 
@@ -96,25 +112,57 @@ const PagMiCuenta = () => {
     }));
   };
 
-  const handleConfirmPassword = () => {
-    // TODO: aquí va la llamada real al backend para cambiar contraseña
-    // ej: await api.changePassword({ current: passwordData.current, next: passwordData.next });
-    setPasswordData({ current: "", next: "" });
-    setIsChangingPassword(false);
+  const handleConfirmPassword = async () => {
+    try {
+      setErrorMessage("");
+
+      if (!passwordData.current || !passwordData.next) {
+        setErrorMessage("Completa ambos campos de contraseña");
+        return;
+      }
+
+      //Llama la funcion al backend
+      await changePassword(token, passwordData.current, passwordData.next);
+
+      
+      setPasswordData({ current: "", next: "" });
+      setIsChangingPassword(false);
+
+    } catch (err) {
+      console.error(err);
+      setErrorMessage(err.message);
+    }
   };
 
-  // Botón Confirmar cambios: sólo prepara datos para backend
-  const handleConfirmChanges = () => {
-    const payload = {
-      userId: user?.IdUsuario || user?.id || user?._id || null,
-      nombre: formData.nombre,
-      nickname: formData.nickname,
-      correo: formData.correo,
-      rolUsuario: rolUsuario,
-    };
 
-    console.log("Datos de perfil listos para enviar al backend:", payload);
-    // TODO: aquí se hará la llamada real al backend cuando esté lista
+  // Botón Confirmar cambios
+  const handleConfirmChanges = async () => {
+    try {
+        setErrorMessage(""); // limpia error 
+        const payload = {
+          nombre: formData.nombre,
+          nickname: formData.nickname,
+          correo: formData.correo,
+        };
+        //LLamada al backend
+        const updated = await updateProfile(token, payload);
+
+        //Traer el perfil completo con la info que no es editable tambien
+        const fullProfile = await getProfile(token);
+        setProfile(fullProfile);
+
+        //Se actualiza el usuario del authcontext
+        updateUser({
+          NombreUsuario: fullProfile.NombreUsuario,
+          Nickname: fullProfile.Nickname,
+          CorreoUsuario: fullProfile.CorreoUsuario,
+        });
+
+        setIsEditing(false);
+      } catch (err) {
+        console.error("Error al actualizar perfil:", err);
+        setErrorMessage(err.message);
+      }
   };
 
   const panelVariants = {
@@ -131,6 +179,18 @@ const PagMiCuenta = () => {
     hidden: { opacity: 0, y: -10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.25 } },
     exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
+  };
+
+  //Formatea la fecha para mostrarla bien
+  const formatDateTime = (isoString) => {
+    if (!isoString) return "—";
+    const date = new Date(isoString);
+    return date.toLocaleString("es-CL", {
+      timeZone: "America/Santiago",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
   return (
@@ -392,7 +452,7 @@ const PagMiCuenta = () => {
                   Proyectos
                 </span>
                 <span className="block text-yellow-300 font-bold text-lg text-center">
-                  {user.TotalProyectos ?? 0}
+                  {profile.TotalProyectos ?? 0}
                 </span>
               </div>
               <div className="px-4 py-2 rounded-full bg-[#2c2410] border border-yellow-500/60 text-sm">
@@ -400,7 +460,7 @@ const PagMiCuenta = () => {
                   Reservas
                 </span>
                 <span className="block text-yellow-300 font-bold text-lg text-center">
-                  {user.TotalReservas ?? 0}
+                  {profile.TotalReservas ?? 0}
                 </span>
               </div>
             </div>
@@ -419,13 +479,13 @@ const PagMiCuenta = () => {
               <p className="text-sm text-gray-300 mb-1">
                 Fecha de registro:{" "}
                 <span className="font-semibold text-yellow-200">
-                  {user.FechaRegistro || "—"}
+                  {formatDateTime(profile.FechaCreacion)}
                 </span>
               </p>
               <p className="text-sm text-gray-300 mb-1">
                 Última conexión:{" "}
                 <span className="font-semibold text-yellow-200">
-                  {user.UltimaConexion || "—"}
+                  {formatDateTime(profile.FechaUltimaSesion)}
                 </span>
               </p>
             </div>
@@ -438,13 +498,13 @@ const PagMiCuenta = () => {
                 <li>
                   Último proyecto registrado:{" "}
                   <span className="italic">
-                    {user.UltimoProyecto || "—"}
+                    {profile.UltimoProyecto || "—"}
                   </span>
                 </li>
                 <li>
                   Reserva más reciente:{" "}
                   <span className="italic">
-                    {user.ReservaMasReciente || "—"}
+                    {profile.ReservaMasReciente || "—"}
                   </span>
                 </li>
               </ul>

@@ -26,3 +26,23 @@ exports.obtenerPerfil = async (req, res, next) => {
     next(err);
   }
 };
+
+//Actualizar datos del perfil
+exports.actualizarPerfil = async (req, res, next) => {
+  try {
+    const data = await userService.updateProfile(req.user.id, req.body);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+};
+
+//Actualizar Password
+exports.cambiarPassword = async (req, res, next) => {
+  try {
+    const data = await userService.changePassword(req.user.id, req.body);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+};
