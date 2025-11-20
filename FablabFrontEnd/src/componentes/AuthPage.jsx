@@ -6,7 +6,8 @@ import { handleRegister, handleLogin } from "../controllers/userController";
 import { useAuth } from "../context/AuthContext";
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  // modos: "login" | "register" | "forgot"
+  const [mode, setMode] = useState("login");
   const navigate = useNavigate();
   const { login } = useAuth(); 
 
@@ -21,6 +22,10 @@ export default function AuthPage() {
 
   // Estado para mensajes de error
   const [errorMessage, setErrorMessage] = useState("");
+
+  const isLogin = mode === "login";
+  const isRegister = mode === "register";
+  const isForgot = mode === "forgot";
 
   const variants = {
     initial: { opacity: 0, y: 50 },
@@ -79,12 +84,19 @@ export default function AuthPage() {
       setErrorMessage(error.message || "Error al iniciar sesión");
     }
   }
-
+  
+  const title =
+    mode === "login"
+      ? "Iniciar Sesión"
+      : mode === "register"
+      ? "Crear Cuenta"
+      : "Recuperar contraseña";
 
   return (
-    <AuthLayout title={isLogin ? "Iniciar Sesión" : "Crear Cuenta"}>
+    <AuthLayout title={title}>
       <AnimatePresence mode="wait">
-        {isLogin ? (
+        {/* LOGIN */}
+        {isLogin && (
           <motion.form
             key="login"
             variants={variants}
@@ -116,6 +128,15 @@ export default function AuthPage() {
               onChange={(e) => setPasswordLogin(e.target.value)}
             />
 
+            {/* Link para recuperar contraseña */}
+            <button
+              type="button"
+              className="text-xs text-yellow-400 hover:underline self-end -mt-1"
+              onClick={() => setMode("forgot")}
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+
             <button
               type="submit"
               className="mt-2 bg-yellow-400 text-black py-2 rounded-md font-bold hover:bg-yellow-500 transition"
@@ -130,13 +151,14 @@ export default function AuthPage() {
             <p className="text-gray-300 mt-3 text-sm text-center">
               ¿No tienes una cuenta?{" "}
               <span
-                onClick={() => setIsLogin(false)}
+                onClick={() => setMode("register")}
                 className="text-yellow-400 hover:underline cursor-pointer"
               >
                 Regístrate
               </span>
             </p>
 
+            {/* Volver al inicio */}
             <motion.p
               variants={fadeIn}
               initial="initial"
@@ -147,14 +169,17 @@ export default function AuthPage() {
               ← Volver al inicio
             </motion.p>
           </motion.form>
-        ) : (
+        )}
+
+        {/* REGISTRO */}
+        {isRegister && (
           <motion.form
             key="register"
             variants={variants}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="flex flex-col gap-4 w-[320px]"
+            className="flex flex-col gap-2 w-[320px]"
             onSubmit={onSubmitRegister}
           >
             <label className="text-gray-200 text-sm font-semibold">
@@ -169,6 +194,15 @@ export default function AuthPage() {
             />
 
             <label className="text-gray-200 text-sm font-semibold">
+              Nickname
+            </label>
+            <input
+              type="text"
+              placeholder="Ingresa tu nickname"
+              className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+            />
+
+            <label className="text-gray-200 text-sm font-semibold">
               Correo electrónico
             </label>
             <input
@@ -178,7 +212,7 @@ export default function AuthPage() {
               value={emailRegister}
               onChange={(e) => setEmailRegister(e.target.value)}
             />
-
+            
             <label className="text-gray-200 text-sm font-semibold">
               Contraseña
             </label>
@@ -204,13 +238,68 @@ export default function AuthPage() {
             <p className="text-gray-300 mt-3 text-sm text-center">
               ¿Ya tienes cuenta?{" "}
               <span
-                onClick={() => setIsLogin(true)}
+                onClick={() => setMode("login")}
                 className="text-yellow-400 hover:underline cursor-pointer"
               >
                 Inicia sesión
               </span>
             </p>
 
+            {/* Volver al inicio */}
+            <motion.p
+              variants={fadeIn}
+              initial="initial"
+              animate="animate"
+              className="text-gray-400 text-sm mt-2 cursor-pointer hover:text-yellow-400 transition text-left"
+              onClick={() => navigate("/")}
+            >
+              ← Volver al inicio
+            </motion.p>
+          </motion.form>
+        )}
+
+        {/* RECUPERAR CONTRASEÑA */}
+        {isForgot && (
+          <motion.form
+            key="forgot"
+            variants={variants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="flex flex-col gap-4 w-[320px]"
+          >
+            <label className="text-gray-200 text-sm font-semibold">
+              Correo electrónico
+            </label>
+            <input
+              type="email"
+              placeholder="Ingresa el correo con el que te registraste"
+              className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+            />
+
+            <p className="text-xs text-gray-300">
+              Recibirás un correo con instrucciones para restablecer tu
+              contraseña
+            </p>
+
+            <button
+              type="submit"
+              className="mt-2 bg-yellow-400 text-black py-2 rounded-md font-bold hover:bg-yellow-500 transition"
+            >
+              Enviar instrucciones
+            </button>
+
+            <p className="text-gray-300 mt-3 text-sm text-center">
+              ¿Recordaste tu contraseña?{" "}
+              <span
+                onClick={() => setMode("login")}
+                className="text-yellow-400 hover:underline cursor-pointer"
+              >
+                Inicia sesión
+              </span>
+            </p>
+
+            {/* Volver al inicio */}
             <motion.p
               variants={fadeIn}
               initial="initial"

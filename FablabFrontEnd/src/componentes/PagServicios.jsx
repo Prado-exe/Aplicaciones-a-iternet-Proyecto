@@ -3,11 +3,14 @@ import Navbar from "./Navbar";
 import { Link } from "react-router-dom";
 import UniqueDivider from "./UniqueDivider";
 
+// ✅ import de la imagen local
+import imgAR from "../assets/medium-shot-man-wearing-vr-glasses.png";
+
 export default function PagServicios() {
   const bloques = [
     {
       id: "laser",
-      titulo: "Cortadora Láser",
+      titulo: "Corte y Grabado Láser",
       desc: `Nuestra cortadora láser permite realizar cortes y grabados de alta precisión en
       madera, acrílico, cartón y otros materiales. Es ideal para crear prototipos, maquetas
       arquitectónicas, piezas personalizadas y trabajos artísticos, ofreciendo acabados limpios
@@ -33,13 +36,17 @@ export default function PagServicios() {
       img: "https://a.storyblok.com/f/169662/1200x627/4958ad2943/proyectos-de-electro-nica-y-robo-tica.jpg",
     },
     {
-      id: "vr-ar",
-      titulo: "Realidad Virtual (VR-AR)",
-      desc: `Área dedicada a experiencias inmersivas para pruebas de proyectos interactivos,
-      simulaciones, visualización de modelos 3D y demostraciones educativas. Incluye equipos de
-      última generación y un espacio seguro para la exploración de entornos virtuales o
-      aumentados.`,
+      id: "vr",
+      titulo: "Realidad Virtual (VR)",
+      desc: `Área dedicada a experiencias completamente inmersivas donde el usuario entra en entornos digitales creados en 3D. Permite simular escenarios complejos, recorrer prototipos arquitectónicos, experimentar productos antes de fabricarlos y realizar entrenamientos seguros sin riesgo en el mundo físico. Ideal para simulaciones, validación de ideas y demostraciones interactivas en contexto controlado.`,
       img: "https://userena.cl/images/imagenes_articulos/uls_noticias/2023/junio/nota_junio_19_1_1.jpg",
+    },
+    {
+      id: "ar",
+      titulo: "Realidad Aumentada (AR)",
+      desc: `Espacio orientado a experiencias que mezclan el mundo real con contenido digital superpuesto en tiempo real. Permite visualizar modelos 3D sobre mesas, maquetas o superficies físicas, agregar capas de información a proyectos, guiar procesos paso a paso y crear demostraciones interactivas sin aislar al usuario de su entorno. Ideal para presentaciones a clientes, educación y apoyo en procesos de diseño y fabricación.`,
+      // ✅ aquí usamos la variable importada, no un string
+      img: imgAR,
     },
   ];
 
@@ -55,6 +62,9 @@ export default function PagServicios() {
       { threshold: 0.2 }
     );
     cards.forEach((card) => observer.observe(card));
+
+    // opcional: limpiar el observer al desmontar
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -93,7 +103,7 @@ export default function PagServicios() {
                   to={`/reserva/${b.id}`}
                   className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-2 rounded-full shadow-lg transition-all duration-300 hover:scale-105"
                 >
-                  Reservar una hora
+                  Solicitud
                 </Link>
               </div>
 

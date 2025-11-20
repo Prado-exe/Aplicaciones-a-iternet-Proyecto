@@ -9,11 +9,12 @@ export default function AuthLayout({ title, children }) {
   const images = [fab1, fab2, fab3];
   const [current, setCurrent] = useState(0);
   const [isRegister, setIsRegister] = useState(false);
-  const [flash, setFlash] = useState(false); // 🔹 estado del brillo temporal
+  const [flash, setFlash] = useState(false);
 
-  // Detecta si es el formulario de registro
+  // Detecta si es el formulario de registro (título contiene "crear")
   useEffect(() => {
-    setIsRegister(title?.toLowerCase().includes("crear"));
+    const lower = title?.toLowerCase() || "";
+    setIsRegister(lower.includes("crear"));
   }, [title]);
 
   // Carrusel de imágenes
@@ -24,7 +25,7 @@ export default function AuthLayout({ title, children }) {
     return () => clearInterval(interval);
   }, []);
 
-  // 🔹 Variantes compartidas para animación suave desde abajo
+  // Animación suave desde abajo
   const fadeUp = {
     initial: { opacity: 0, y: 40 },
     animate: {
@@ -35,7 +36,7 @@ export default function AuthLayout({ title, children }) {
     exit: { opacity: 0, y: -40, transition: { duration: 0.3, ease: "easeIn" } },
   };
 
-  // 🔹 Escucha clics en los botones para activar flash del título
+  // Escucha clics en botones para activar flash del título
   useEffect(() => {
     const handleFlash = (e) => {
       if (e.target.tagName === "BUTTON") {
@@ -48,25 +49,35 @@ export default function AuthLayout({ title, children }) {
   }, []);
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen overflow-hidden text-white">
-      {/* 🔹 Fondo fijo con blur y oscurecido */}
+    <div className="relative flex items-center justify-center min-h-screen overflow-hidden text-white pt-19 md:pt:20">
+      {/* Fondo fijo con blur y oscurecido */}
       <div
         className="absolute inset-0 bg-cover bg-center filter blur-lg brightness-75"
         style={{ backgroundImage: `url(${fablabTest})` }}
       ></div>
 
-      {/* 🔹 Card principal fija (altura dinámica según login/registro) */}
+      {/* Card principal: cambia de altura y desliza contenido
+          login: formulario izq / carrusel der
+          registro: carrusel izq / formulario der */}
       <motion.div
         layout
         animate={{
-          height: isRegister ? 560 : 480,
+          height: isRegister ? 560 : 460,
         }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
-        className="relative z-10 flex w-[950px] rounded-2xl overflow-hidden shadow-2xl bg-black/50 backdrop-blur-md border border-gray-700/40"
+        transition={{
+          duration: 0.4,
+          ease: "easeInOut",
+          layout: { duration: 0.5, ease: "easeInOut" }, // animación de deslizamiento
+        }}
+        className={`relative z-10 flex w-[950px] rounded-2xl overflow-hidden shadow-2xl bg-black/50 backdrop-blur-md border border-gray-700/40 ${
+          isRegister ? "flex-row-reverse" : "flex-row"
+        }`}
       >
-        {/* Panel izquierdo - formulario */}
-        <div className="flex-1 flex flex-col justify-center items-center p-10">
-          {/* 🔹 Título animado con entrada desde abajo y resplandor controlado */}
+        {/* Panel formulario (se mueve de lado con layout) */}
+        <motion.div
+          layout
+          className="flex-1 flex flex-col justify-center items-center px-8 py-6"
+        >
           <motion.h2
             key={title}
             variants={fadeUp}
@@ -74,7 +85,7 @@ export default function AuthLayout({ title, children }) {
             animate="animate"
             exit="exit"
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="text-3xl font-bold mb-6 text-yellow-400 drop-shadow-md text-center"
+            className="text-3xl font-bold mb-5 text-yellow-400 drop-shadow-md text-center"
             style={{
               textShadow: flash
                 ? "0 0 6px #facc15, 0 0 12px #facc15, 0 0 20px #facc15"
@@ -84,7 +95,6 @@ export default function AuthLayout({ title, children }) {
             {title}
           </motion.h2>
 
-          {/* 🔹 Contenido del formulario (children) */}
           <motion.div
             key={`${title}-content`}
             variants={fadeUp}
@@ -96,10 +106,10 @@ export default function AuthLayout({ title, children }) {
           >
             {children}
           </motion.div>
-        </div>
+        </motion.div>
 
-        {/* Panel derecho - carrusel fijo */}
-        <div className="flex-1 relative">
+        {/* Panel carrusel (también tiene layout para deslizarse) */}
+        <motion.div layout className="flex-1 relative">
           <motion.img
             key={current}
             src={images[current]}
@@ -110,7 +120,7 @@ export default function AuthLayout({ title, children }) {
             transition={{ duration: 1 }}
             className="absolute inset-0 w-full h-full object-cover"
           />
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );

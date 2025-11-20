@@ -1,10 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import logo from '../assets/logo.png';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import '../styles/Navbar.css'; // Puedes mantener estilos antiguos si hay animaciones globales
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import logo from "../assets/FABLABHorizaontalBlanco.svg";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import "../styles/Navbar.css";
 import { useAuth } from "../context/AuthContext";
 
+// 🔹 Clases para los links del menú (versión desktop)
+const navLinkClass = ({ isActive }) =>
+  [
+    "relative px-4 py-1.5 text-sm font-semibold tracking-wide transition-all duration-200 cursor-pointer",
+    isActive
+      ? [
+          // ACTIVO → pastilla dorada + brillo (SIN reflejo abajo)
+          "text-black bg-yellow-400 rounded-full",
+          "shadow-[0_0_18px_rgba(250,204,21,0.9)]",
+        ].join(" ")
+      : // NORMAL
+        "text-gray-100 hover:text-yellow-300",
+  ].join(" ");
+
+// 🔹 Versión simplificada para el menú móvil
+const navLinkClassMobile = ({ isActive }) =>
+  [
+    "relative text-lg font-medium transition-all duration-200",
+    isActive ? "text-yellow-300" : "text-white hover:text-yellow-300",
+  ].join(" ");
 
 export default function Navbar() {
   const [open, setOpen] = useState(false); // menú móvil
@@ -51,9 +71,7 @@ export default function Navbar() {
 
   // Nombre que vamos a mostrar (Nickname > primer nombre > "Usuario")
   const displayName =
-    user?.Nickname ||
-    user?.NombreUsuario?.split(" ")[0] ||
-    "Usuario";
+    user?.Nickname || user?.NombreUsuario?.split(" ")[0] || "Usuario";
 
   // Si más adelante guardan una URL de foto de perfil, se usará aquí
   const avatarUrl = user?.FotoPerfil || null;
@@ -63,45 +81,42 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-[#0b0b0f] shadow-[0_2px_10px_rgba(0,0,0,0.4)] transition-all duration-500">
-      <nav className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
+      <nav className="flex items-center justify-between px-8 py-5 max-w-7xl mx-auto">
         {/* LOGO */}
         <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="FABLAB FIULS" className="h-10 w-auto" />
-          <span className="text-white font-bold text-lg tracking-wide">
-            FABLAB <span className="text-yellow-400">FIULS</span>
-          </span>
+          <img src={logo} alt="FABLAB FIULS" className="h-12   w-auto" />
         </Link>
 
         {/* MENU DESKTOP */}
-        <ul className="hidden md:flex items-center gap-10 text-white font-medium">
+        <ul className="hidden md:flex items-center gap-6 text-white font-medium">
           <li>
-            <Link to="/" className="hover:text-yellow-400 transition">
+            <NavLink to="/" className={navLinkClass} end>
               Inicio
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link
+            <NavLink
               to="/pag-quienes-somos"
-              className="hover:text-yellow-400 transition"
+              className={navLinkClass}
             >
               Quiénes Somos
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link
+            <NavLink
               to="/pag-servicios"
-              className="hover:text-yellow-400 transition"
+              className={navLinkClass}
             >
               Servicios
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link
+            <NavLink
               to="/pag-noticiero"
-              className="hover:text-yellow-400 transition"
+              className={navLinkClass}
             >
               Eventos
-            </Link>
+            </NavLink>
           </li>
 
           {/* 🔹 Si hay usuario logueado → avatar tipo GitHub + menú */}
@@ -171,7 +186,7 @@ export default function Navbar() {
             <li>
               <button
                 onClick={() => navigate("/auth")}
-                className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-5 py-2 rounded-full shadow-lg transition"
+                className="bg-yellow-400 text-black font-semibold px-5 py-2 rounded-full shadow-md hover:shadow-[0_0_18px_rgba(250,204,21,0.9)] hover:bg-yellow-400 transition"
               >
                 Acceder
               </button>
@@ -194,35 +209,43 @@ export default function Navbar() {
             ${open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
           `}
         >
-          <ul className="flex flex-col items-center gap-5 py-6 text-white text-lg font-medium">
+          <ul className="flex flex-col items-center gap-5 py-6 text-white font-medium">
             <li>
-              <Link to="/" onClick={() => setOpen(false)}>
+              <NavLink
+                to="/"
+                end
+                className={navLinkClassMobile}
+                onClick={() => setOpen(false)}
+              >
                 Inicio
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/pag-quienes-somos"
+                className={navLinkClassMobile}
                 onClick={() => setOpen(false)}
               >
                 Quiénes Somos
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/pag-servicios"
+                className={navLinkClassMobile}
                 onClick={() => setOpen(false)}
               >
                 Servicios
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/pag-noticiero"
+                className={navLinkClassMobile}
                 onClick={() => setOpen(false)}
               >
                 Eventos
-              </Link>
+              </NavLink>
             </li>
 
             {isAuthenticated ? (
@@ -269,7 +292,7 @@ export default function Navbar() {
                     navigate("/auth");
                     setOpen(false);
                   }}
-                  className="bg-yellow-400 text-black px-5 py-2 rounded-full font-semibold shadow-md hover:bg-yellow-500 transition"
+                  className="bg-yellow-400 text-black px-5 py-2 rounded-full font-semibold shadow-md hover:bg-yellow-400 hover:shadow-[0_0_18px_rgba(250,204,21,0.9)] transition"
                 >
                   Acceder
                 </button>
