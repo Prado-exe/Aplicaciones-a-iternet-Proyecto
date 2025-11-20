@@ -209,7 +209,7 @@ export default function AuthPage() {
 
             <p className="text-xs text-gray-300">
               Recibirás un correo con instrucciones para restablecer tu
-              contraseña (funcionalidad pendiente de conectar con el backend).
+              contraseña
             </p>
 
             <button
