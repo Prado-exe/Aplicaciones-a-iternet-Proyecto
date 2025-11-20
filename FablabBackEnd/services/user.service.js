@@ -6,15 +6,16 @@ const Solicitudes = require('../models/Solicitudes');
 const Proyecto = require('../models/Proyecto');
 
 //Crear Usuario
-exports.createUser = async ({ NombreUsuario, CorreoUsuario, ContraUsuario }) => {
+exports.createUser = async ({ NombreUsuario, Nickname, CorreoUsuario, ContraUsuario }) => {
   // Validacion de campos vacios
-  if (!NombreUsuario || !CorreoUsuario || !ContraUsuario) {
+  if (!NombreUsuario || !Nickname || !ContraUsuario || !CorreoUsuario ) {
     const e = new Error('Faltan campos');
     e.status = 400;
     throw e;
   }
-  //Convertir a min
+  //eliminar espacios y convertir a min
   CorreoUsuario = CorreoUsuario.trim().toLowerCase();
+  Nickname = Nickname.trim();
 
   //Validacion de correo Unico
   const existe = await Usuario.findOne({ CorreoUsuario }).lean();
@@ -24,13 +25,22 @@ exports.createUser = async ({ NombreUsuario, CorreoUsuario, ContraUsuario }) => 
     throw e;
   }
 
+  //Validacion de Nick unico
+  const existeNick = await Usuario.findOne({ Nickname }).lean();
+  if (existeNick) {
+    const e = new Error('El nickname ya está en uso');
+    e.status = 409;
+    throw e;
+  }
+
   try {
-    const doc = await Usuario.create({ NombreUsuario, CorreoUsuario, ContraUsuario });
+    const doc = await Usuario.create({ NombreUsuario, Nickname, CorreoUsuario, ContraUsuario});
 
     const { ContraUsuario: _, ...safe } = doc.toObject();
     return safe;
 
 } catch (err) {
+
   if (err.name === 'ValidationError') {
     const errores = Object.values(err.errors).map(x => ({
       campo: x.path,
@@ -41,6 +51,17 @@ exports.createUser = async ({ NombreUsuario, CorreoUsuario, ContraUsuario }) => 
     e.errors = errores;
     throw e;
   }
+  if (err.code === 11000) {
+        const campo = Object.keys(err.keyPattern)[0];
+        const e = new Error(
+          campo === "CorreoUsuario"
+            ? "El correo ya está registrado"
+            : "El nickname ya está en uso"
+        );
+        e.status = 409;
+        throw e;
+    }
+
   throw err;
 }
 
@@ -114,44 +135,23 @@ exports.getProfile = async (userId) => {
 };
 
 
-//Actualizar perfil
 exports.updateProfile = async (userId, { nombre, nickname, correo }) => {
-  const updates = {};
-  //Actualizar nombres y Nicknames
-  if (nombre !== undefined) updates.NombreUsuario = nombre;
-  if (nickname !== undefined) updates.Nickname = nickname;
+  const update = {};
 
-
-  if (correo !== undefined) {
-    correo = correo.trim().toLowerCase();
-
-    // Validar correo único
-    const existe = await Usuario.findOne({
-      CorreoUsuario: correo,
-      _id: { $ne: userId },
-    }).lean();
-
-    if (existe) {
-      const e = new Error("El correo ya está registrado");
-      e.status = 409;
-      throw e;
-    }
-
-    updates.CorreoUsuario = correo;
-  }
+  if (nombre !== undefined) update.NombreUsuario = nombre;
+  if (nickname !== undefined) update.Nickname = nickname.trim();
+  if (correo !== undefined) update.CorreoUsuario = correo.trim().toLowerCase();
 
   try {
     const user = await Usuario.findByIdAndUpdate(
       userId,
-      updates,
+      update,
       {
         new: true,
-        runValidators: true, // ✅ corre las validaciones del schema
-        context: "query",
+        runValidators: true,  
+        context: "query"
       }
-    )
-      .select("-ContraUsuario -__v")
-      .lean();
+    ).select("-ContraUsuario -__v").lean();
 
     if (!user) {
       const e = new Error("Usuario no encontrado");
@@ -160,23 +160,30 @@ exports.updateProfile = async (userId, { nombre, nickname, correo }) => {
     }
 
     return user;
-  } catch (err) {
-    //Los errores del modelo
-    if (err.name === "ValidationError") {
-      const errores = Object.values(err.errors).map(x => ({
-        campo: x.path,
-        mensaje: x.message,
-      }));
 
-      const e = new Error(errores[0].mensaje);
+  } catch (err) {
+    if (err.name === "ValidationError") {
+      const msg = Object.values(err.errors)[0].message;
+      const e = new Error(msg);
       e.status = 400;
-      e.errors = errores;
+      throw e;
+    }
+
+    if (err.code === 11000) {
+      const campo = Object.keys(err.keyPattern)[0];
+      const e = new Error(
+        campo === "CorreoUsuario"
+          ? "El correo ya está registrado"
+          : "El nickname ya está en uso"
+      );
+      e.status = 409;
       throw e;
     }
 
     throw err;
   }
 };
+
 
 
 //Cambiar Password

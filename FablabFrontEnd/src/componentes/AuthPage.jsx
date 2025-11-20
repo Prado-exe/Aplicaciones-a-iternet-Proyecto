@@ -19,6 +19,7 @@ export default function AuthPage() {
   const [nombre, setNombre] = useState("");
   const [emailRegister, setEmailRegister] = useState("");
   const [passwordRegister, setPasswordRegister] = useState("");
+  const [nickname, setNickname] = useState("");
 
   // Estado para mensajes de error
   const [errorMessage, setErrorMessage] = useState("");
@@ -56,6 +57,7 @@ export default function AuthPage() {
     try {
       const { user, token } = await handleRegister({
         nombre,
+        nickname,
         correo: emailRegister,
         contraseña: passwordRegister,
       });
@@ -200,6 +202,8 @@ export default function AuthPage() {
               type="text"
               placeholder="Ingresa tu nickname"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
             />
 
             <label className="text-gray-200 text-sm font-semibold">

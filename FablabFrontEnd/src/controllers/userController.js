@@ -2,13 +2,14 @@
 import { registerUser,loginUser } from "../api/userService";
 
 //Validacion del registro del usuario
-export async function handleRegister({ nombre, correo, contraseña }) {
-  if (!nombre || !correo || !contraseña) {
+export async function handleRegister({ nombre, nickname, correo, contraseña }) {
+  if (!nombre || !nickname || !correo || !contraseña) {
     throw new Error("Todos los campos son obligatorios");
   }
 
   await registerUser({
     NombreUsuario: nombre,
+    Nickname: nickname,
     CorreoUsuario: correo,
     ContraUsuario: contraseña,
   });

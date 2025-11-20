@@ -4,9 +4,18 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
   TipoUsuario: { 
     type: Number,
-    enum: [1, 2, 3, 4], //
-    default: 1,  
+    enum: [1, 2], //
+    default: 2,  
     required: [true, 'El tipo de usuario es requerido'],
+  },
+  
+  Nickname: {
+    type: String,
+    required: [true, 'El Nickname de usuario es requerido'],
+    trim: true,
+    unique: true,     
+    minlength: [3, 'El Nickname debe tener al menos 3 caracteres'],
+    maxlength: 30,
   },
 
   NombreUsuario: {
