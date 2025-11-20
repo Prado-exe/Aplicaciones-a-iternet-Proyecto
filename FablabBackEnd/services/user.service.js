@@ -1,22 +1,49 @@
 //Logica y BD
-const Usuario = require('../models/user');
+const Usuario = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 //Crear Usuario
 exports.createUser = async ({ NombreUsuario, CorreoUsuario, ContraUsuario }) => {
+  // Validacion de campos vacios
   if (!NombreUsuario || !CorreoUsuario || !ContraUsuario) {
-    const e = new Error('Faltan campos'); e.status = 400; throw e;
+    const e = new Error('Faltan campos');
+    e.status = 400;
+    throw e;
   }
+  //Convertir a min
   CorreoUsuario = CorreoUsuario.trim().toLowerCase();
 
+  //Validacion de correo Unico
   const existe = await Usuario.findOne({ CorreoUsuario }).lean();
-  if (existe) { const e = new Error('El correo ya está registrado'); e.status = 409; throw e; }
+  if (existe) {
+    const e = new Error('El correo ya está registrado');
+    e.status = 409;
+    throw e;
+  }
 
-  const doc = await Usuario.create({ NombreUsuario, CorreoUsuario, ContraUsuario });
-  const { ContraUsuario: _, ...safe } = doc.toObject();
-  return safe;
+  try {
+    const doc = await Usuario.create({ NombreUsuario, CorreoUsuario, ContraUsuario });
+
+    const { ContraUsuario: _, ...safe } = doc.toObject();
+    return safe;
+
+} catch (err) {
+  if (err.name === 'ValidationError') {
+    const errores = Object.values(err.errors).map(x => ({
+      campo: x.path,
+      mensaje: x.message,
+    }));
+    const e = new Error(errores[0].mensaje);
+    e.status = 400;
+    e.errors = errores;
+    throw e;
+  }
+  throw err;
+}
+
 };
+
 
 //Login usuario
 exports.login = async ({ CorreoUsuario, ContraUsuario }) => {

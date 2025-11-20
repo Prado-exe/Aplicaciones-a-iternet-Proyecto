@@ -9,7 +9,7 @@ router.post('/register', registrarUsuario);
 // Login
 router.post('/login', loginUsuario);
 
-// Perfil (protegido)
+// Perfil 
 router.get('/perfil', verificarToken, obtenerPerfil);
 
 module.exports = router;
