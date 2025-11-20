@@ -85,10 +85,10 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-[#0b0b0f] shadow-[0_2px_10px_rgba(0,0,0,0.4)] transition-all duration-500">
-      <nav className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
+      <nav className="flex items-center justify-between px-8 py-5 max-w-7xl mx-auto">
         {/* LOGO */}
         <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="FABLAB FIULS" className="h-10 w-auto" />
+          <img src={logo} alt="FABLAB FIULS" className="h-12   w-auto" />
         </Link>
 
         {/* MENU DESKTOP */}

@@ -14,7 +14,7 @@ export default function Footer() {
           <img
             src={Logo}
             alt="Logo FABLAB"
-            className="w-32 filter drop-shadow-[0_0_10px_rgba(255,215,0,0.3)] hover:drop-shadow-[0_0_15px_rgba(255,215,0,0.5)] transition duration-500"
+            className="w-48 filter drop-shadow-[0_0_10px_rgba(255,215,0,0.3)] hover:drop-shadow-[0_0_15px_rgba(255,215,0,0.5)] transition duration-500"
           />
           <p className="text-gray-400 text-sm">
             © 2025 FABLAB FIULS. Todos los derechos reservados.
