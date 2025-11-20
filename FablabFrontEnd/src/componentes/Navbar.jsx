@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, NavLink } from "react-router-dom";
 import logo from '../assets/logo.png';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/Navbar.css'; // Puedes mantener estilos antiguos si hay animaciones globales
@@ -49,6 +49,17 @@ export default function Navbar() {
     navigate('/');
   };
 
+  // 1️⃣ Definición de las clases para DESKTOP
+  const navLinkClass = ({ isActive }) =>
+    `font-medium transition-colors ${
+      isActive ? "text-[#ffd700] border-b-2 border-[#ffd700]" : "text-white hover:text-[#ffdf5b]"
+    } py-1`;
+
+  // 2️⃣ Definición de las clases para MÓVIL
+  const navLinkClassMobile = ({ isActive }) =>
+    `block px-4 py-2 w-full text-center ${
+      isActive ? "bg-[#ffd700] text-black font-bold rounded-lg" : "text-white hover:bg-gray-700 rounded-lg"
+    } transition-all duration-300`;
   // Nombre que vamos a mostrar (Nickname > primer nombre > "Usuario")
   const displayName =
     user?.Nickname || user?.NombreUsuario?.split(" ")[0] || "Usuario";
