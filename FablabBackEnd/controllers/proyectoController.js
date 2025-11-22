@@ -36,3 +36,11 @@ exports.actualizarProyecto = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+exports.eliminarProyecto = async (req, res, next) => {
+  try {
+    const data = await proyectoService.deleteProject(req.user.id, req.params.id);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import UniqueDivider from "./UniqueDivider";
+import { useAuth } from "../context/AuthContext";
+import { getMyProjects, createProject,deleteProject } from "../api/proyectService";
+
 
 const LOCAL_KEY = "portfolioEntriesFabLab";
 
 const PagMisProyectos = () => {
-  const [user, setUser] = useState(null);
 
+  const { user, token, isAuthenticated } = useAuth();
+  
   // Historial de registros en el FabLab (modo demo)
   const [entries, setEntries] = useState([]);
 
@@ -24,22 +28,44 @@ const PagMisProyectos = () => {
   const [newImageUrl, setNewImageUrl] = useState("");
   const [tempImages, setTempImages] = useState([]);
 
-  // Cargar usuario y registros guardados en localStorage (modo demo)
+  // Cargar proyectos reales desde el backend
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    // Si no hay token, no llamamos api
+    if (!token) return;
 
-    const savedEntries = localStorage.getItem(LOCAL_KEY);
-    if (savedEntries) {
-      const parsed = JSON.parse(savedEntries);
-      setEntries(parsed);
-      if (parsed.length > 0) {
-        setSelectedId(parsed[0].id);
+    const fetchProjects = async () => {
+      try {
+        const proyectos = await getMyProjects(token);
+
+        // Mapeo sencillo: adapto nombres del backend a los que usa la UI
+        const mapped = proyectos.map((p) => ({
+          id: p._id, // id de Mongo
+          titulo: p.NombreProyecto,
+          descripcion: p.DescripcionProyecto || "",
+          // Campos extra pueden venir de backend en el futuro
+          imagenes: [], // por ahora vacío, porque aún no lo guardas en BD
+          fecha: p.FechaCreacion
+            ? new Date(p.FechaCreacion).toLocaleDateString()
+            : "",
+          hora: p.FechaCreacion
+            ? new Date(p.FechaCreacion).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "",
+        }));
+
+        setEntries(mapped);
+        if (mapped.length > 0) {
+          setSelectedId(mapped[0].id);
+        }
+      } catch (err) {
+        console.error("Error cargando proyectos:", err);
       }
-    }
-  }, []);
+    };
+
+    fetchProjects();
+  }, [token]);
 
   // Asegurar que siempre haya un seleccionado si existen entries
   useEffect(() => {
@@ -71,54 +97,76 @@ const PagMisProyectos = () => {
     localStorage.setItem(LOCAL_KEY, JSON.stringify(list));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.titulo.trim()) return;
 
-    const now = new Date();
-    const newEntry = {
-      id: Date.now(),
-      titulo: formData.titulo.trim(),
-      tecnologias: formData.tecnologias.trim(),
-      descripcion: formData.descripcion.trim(),
-      imagenes: tempImages,
-      fecha: now.toLocaleDateString(),
-      hora: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
+    try {
+      // 1) Mandar al backend con los nombres que espera tu servicio
+      const created = await createProject(token, {
+        NombreProyecto: formData.titulo.trim(),
+        DescripcionProyecto: formData.descripcion.trim(),
+      });
 
-    const updated = [newEntry, ...entries];
-    persistEntries(updated);
-    setSelectedId(newEntry.id);
+      const createdDate = created.FechaCreacion
+        ? new Date(created.FechaCreacion)
+        : new Date();
 
-    // Limpiar formulario
-    setFormData({
-      titulo: "",
-      equipo: "",
-      integrantes: "",
-      tecnologias: "",
-      descripcion: "",
-    });
-    setTempImages([]);
-    setNewImageUrl("");
+      const newEntry = {
+        id: created._id,
+        titulo: created.NombreProyecto,
+        descripcion: created.DescripcionProyecto || "",
+        imagenes: tempImages, // de momento solo en frontend
+        fecha: createdDate.toLocaleDateString(),
+        hora: createdDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+
+      const updated = [newEntry, ...entries];
+      setEntries(updated);
+      setSelectedId(newEntry.id);
+
+      // 3) Limpiar formulario
+      setFormData({
+        titulo: "",
+        tecnologias: "",
+        descripcion: "",
+      });
+      setTempImages([]);
+      setNewImageUrl("");
+    } catch (err) {
+      console.error("Error al crear proyecto:", err);
+      // Aquí podrías mostrar un mensaje de error en pantalla si quieres
+    }
   };
+
 
   const handleSelectEntry = (id) => {
     setSelectedId(id);
   };
 
-  const handleDeleteEntry = (id) => {
-    const filtered = entries.filter((e) => e.id !== id);
-    persistEntries(filtered);
+  const handleDeleteEntry = async (id) => {
+    try {
+      //Eliminar en BD
+      await deleteProject(token, id);
 
-    if (filtered.length === 0) {
-      setSelectedId(null);
-    } else if (id === selectedId) {
-      setSelectedId(filtered[0].id);
+      //Actualiza arreglo local
+      const filtered = entries.filter((e) => e.id !== id);
+      setEntries(filtered);
+
+      if (filtered.length === 0) {
+        setSelectedId(null);
+      } else if (id === selectedId) {
+        setSelectedId(filtered[0].id);
+      }
+    } catch (err) {
+      console.error("Error eliminando proyecto:", err);
+      alert("No se pudo eliminar el proyecto.");
     }
   };
 
-  if (!user) {
+
+  if (!isAuthenticated) {
     return (
       <div className="pt-24 min-h-screen bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] flex items-center justify-center text-gray-200">
         <p className="text-lg">

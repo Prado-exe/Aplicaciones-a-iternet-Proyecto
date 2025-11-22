@@ -52,3 +52,22 @@ export async function updateProject(token, projectId, payload) {
   if (!res.ok) throw new Error(data.error || data.message);
   return data.data;
 }
+
+//Eliminar un proyecto
+export async function deleteProject(token, projectId) {
+  const res = await fetch(`${API_URL}/proyectos/${projectId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Error al eliminar proyecto");
+  }
+
+  return data;
+}
