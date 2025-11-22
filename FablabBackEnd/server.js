@@ -36,9 +36,16 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// Importar rutas
+// ------------------Importar rutas-----------------------//
+
+//Ruta de usuario
 const userRoutes = require('./routes/users');
 app.use('/api/users', userRoutes);
+
+//Ruta de proyectos
+const proyectoRoutes = require('./routes/proyectos');
+app.use('/api/proyectos', proyectoRoutes);
+
 
 // Manejo de errores 404
 app.use((req, res) => {

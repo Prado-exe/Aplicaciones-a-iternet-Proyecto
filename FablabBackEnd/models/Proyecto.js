@@ -25,7 +25,7 @@ const proyectoSchema = new mongoose.Schema({
   RutaImagenProyecto: {
     type: String,
     trim: true,
-    default: null,
+    default: "https://...",
   },
 
   // Componentes del proyecto (lista de materiales, partes, etc.)

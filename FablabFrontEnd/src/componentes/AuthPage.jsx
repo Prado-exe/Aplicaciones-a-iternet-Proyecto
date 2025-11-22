@@ -2,8 +2,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
-import { handleRegister, handleLogin } from "../controllers/userController"; 
 import { useAuth } from "../context/AuthContext";
+import { loginUser, registerUser} from "../api/userService";
+
+
 
 export default function AuthPage() {
   // modos: "login" | "register" | "forgot"
@@ -55,14 +57,16 @@ export default function AuthPage() {
     e.preventDefault();
     setErrorMessage("");
     try {
-      const { user, token } = await handleRegister({
-        nombre,
-        nickname,
-        correo: emailRegister,
-        contraseña: passwordRegister,
-      });
+      //CamposVacios
+      if (!nombre || !nickname || !emailRegister || !passwordRegister) {throw new Error("Todos los campos son obligatorios");}
+      
+      //Registrar Usuario
+      await registerUser({NombreUsuario: nombre,Nickname: nickname,CorreoUsuario: emailRegister,ContraUsuario: passwordRegister,});
 
       //AutoLogin
+      const { token, user } = await loginUser({CorreoUsuario: emailRegister,ContraUsuario: passwordRegister,});
+
+      //Guardar Sesion Global y redirigir
       login(user, token);
       navigate("/");
 
@@ -76,12 +80,16 @@ export default function AuthPage() {
     e.preventDefault();
     setErrorMessage("");
     try {
-      const { user, token } = await handleLogin({
-        correo: emailLogin,
-        contraseña: passwordLogin,
-      });
+      //Verificar existencia de credenciales
+      if (!emailLogin || !passwordLogin) {setErrorMessage("Faltan credenciales");return;}
+
+      //Logear usuario
+      const { token, user } = await loginUser({CorreoUsuario: emailLogin,ContraUsuario: passwordLogin,});
+
+      //Guardar sesion global y redirigir
       login(user, token);
       navigate("/");
+
     } catch (error) {
       setErrorMessage(error.message || "Error al iniciar sesión");
     }
