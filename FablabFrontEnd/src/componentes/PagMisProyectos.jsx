@@ -15,9 +15,7 @@ const PagMisProyectos = () => {
 
   // Formulario de nuevo registro
   const [formData, setFormData] = useState({
-    titulo: "",
-    equipo: "",
-    integrantes: "",
+    titulo: "", 
     tecnologias: "",
     descripcion: "",
   });
@@ -82,8 +80,6 @@ const PagMisProyectos = () => {
     const newEntry = {
       id: Date.now(),
       titulo: formData.titulo.trim(),
-      equipo: formData.equipo.trim(),
-      integrantes: formData.integrantes.trim(),
       tecnologias: formData.tecnologias.trim(),
       descripcion: formData.descripcion.trim(),
       imagenes: tempImages,
@@ -178,7 +174,7 @@ const PagMisProyectos = () => {
             {/* Workspace / lista de registros */}
             <div className="bg-[#101114] rounded-3xl p-5 md:p-6 border border-yellow-500/30 shadow-[0_0_18px_rgba(255,215,0,0.15)] flex flex-col">
               <h2 className="text-xl font-semibold text-yellow-400 mb-3">
-                Historial de actividades
+                Historial de proyectos
               </h2>
               <p className="text-xs text-gray-400 mb-4">
                 Selecciona un registro para ver el detalle. Al final de la lista
@@ -266,36 +262,6 @@ const PagMisProyectos = () => {
                       </p>
                     </div>
 
-                    {/* Equipo e integrantes */}
-                    <div className="grid md:grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
-                          Equipo
-                        </p>
-                        <p className="text-gray-200">
-                          {selectedEntry.equipo || "—"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
-                          Integrantes
-                        </p>
-                        <p className="text-gray-200 whitespace-pre-line">
-                          {selectedEntry.integrantes || "—"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Tecnologías */}
-                    <div className="text-sm">
-                      <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
-                        Tecnologías / Equipos utilizados
-                      </p>
-                      <p className="text-gray-200 whitespace-pre-line">
-                        {selectedEntry.tecnologias || "—"}
-                      </p>
-                    </div>
-
                     {/* Descripción */}
                     <div className="text-sm">
                       <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
@@ -367,10 +333,10 @@ const PagMisProyectos = () => {
           className="bg-[#15151b] rounded-3xl p-6 md:p-8 border border-yellow-500/30 shadow-[0_0_22px_rgba(255,215,0,0.18)]"
         >
           <h2 className="text-2xl font-semibold text-yellow-400 mb-4">
-            Crear nuevo registro en tu portafolio
+            Crear un nuevo proyecto en tu portafolio
           </h2>
           <p className="text-sm text-gray-300 mb-4">
-            Aquí puedes documentar una actividad específica que realizaste en el
+            Aquí puedes documentar una proyecto específico que realizaste en el
             FabLab: por ejemplo, una impresión 3D, un corte láser, una prueba de
             prototipo, etc.
           </p>
@@ -378,7 +344,7 @@ const PagMisProyectos = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm mb-1">
-                Título de la actividad
+                Título de la proyecto
               </label>
               <input
                 type="text"
@@ -389,48 +355,9 @@ const PagMisProyectos = () => {
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm mb-1">
-                  Nombre del equipo (opcional)
-                </label>
-                <input
-                  type="text"
-                  value={formData.equipo}
-                  onChange={handleChange("equipo")}
-                  className="w-full rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/40 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  placeholder="Ej: Equipo FabLab ULS"
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">
-                  Integrantes (separados por coma)
-                </label>
-                <input
-                  type="text"
-                  value={formData.integrantes}
-                  onChange={handleChange("integrantes")}
-                  className="w-full rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/40 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  placeholder="Ej: Rodrigo G., Matías B."
-                />
-              </div>
-            </div>
-
             <div>
               <label className="block text-sm mb-1">
-                Tecnologías / Equipos utilizados
-              </label>
-              <textarea
-                value={formData.tecnologias}
-                onChange={handleChange("tecnologias")}
-                className="w-full rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/40 focus:outline-none focus:ring-2 focus:ring-yellow-500 min-h-[70px]"
-                placeholder="Ej: Impresora 3D Prusa, PLA, Cura, Arduino, etc."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1">
-                Descripción de la actividad
+                Descripción del proyecto
               </label>
               <textarea
                 value={formData.descripcion}
