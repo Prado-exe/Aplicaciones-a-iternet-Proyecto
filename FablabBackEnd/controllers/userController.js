@@ -1,6 +1,6 @@
 const Usuario = require('../models/User');
 const userService = require('../services/user.service');
-
+const User = require("../models/User");
 //Registrar Usuario
 exports.registrarUsuario = async (req, res, next) => {
   try {
@@ -44,5 +44,18 @@ exports.cambiarPassword = async (req, res, next) => {
     res.json({ success: true, data });
   } catch (err) {
     next(err);
+  }
+};
+
+exports.listarUsuarios = async (req, res) => {
+  try {
+    const usuarios = await User.find().select("-password"); // ocultar pass
+
+    res.json({
+      ok: true,
+      usuarios
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Error obteniendo usuarios" });
   }
 };

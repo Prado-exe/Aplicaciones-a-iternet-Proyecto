@@ -10,7 +10,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import "./styles/index.css";
 import { AuthProvider } from "./context/AuthContext.jsx";
 
-
 // 🔹 Páginas y componentes globales
 import Navbar from "./componentes/Navbar.jsx";
 import Footer from "./componentes/footbar.jsx";
@@ -23,6 +22,11 @@ import AuthPage from "./componentes/AuthPage.jsx";
 import PagMiCuenta from "./componentes/PagMiCuenta.jsx";
 import PagMisProyectos from "./componentes/PagMisProyectos.jsx";
 import PagAdmin from "./componentes/PagAdmin.jsx";
+
+
+//estas componentes las cree para probar las rutas de admin 
+import AdminRoute from "./componentes/AdminRoute";
+import PagNoAutorizado from "./componentes/PagNoAutorizado.jsx";
 
 
 // 🔹 Componente que fuerza el scroll al inicio en cada cambio de ruta
@@ -114,10 +118,21 @@ function AnimatedRoutes() {
           path="/admin"
           element={
             <motion.div {...pageTransition}>
-              <PagAdmin />
+              <AdminRoute>
+                <PagAdmin />
+              </AdminRoute>
             </motion.div>
           }
         />
+        <Route
+          path="/no-autorizado"
+          element={
+            <motion.div {...pageTransition}>
+              <PagNoAutorizado />
+            </motion.div>
+          }
+        />
+
       </Routes>
     </AnimatePresence>
   );

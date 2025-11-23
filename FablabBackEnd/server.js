@@ -16,6 +16,10 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/api/eventos", require("./routes/EventoRoutes"));
+app.use("/api/users", require("./routes/users.js"));
+
+//ruas de testeo para ver si se consulta bien la bd
 
 // Rutas de prueba
 app.get('/', (req, res) => {

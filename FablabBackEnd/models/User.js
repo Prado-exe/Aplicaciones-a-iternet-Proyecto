@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
 
-  // Referencias a otras colecciones
+  // Referencias a otras colecciones, la ref a solicitudes la woa cambiar
   Actividades: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Actividad' }],
   Solicitudes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Solicitud' }],
   Proyectos:   [{ type: mongoose.Schema.Types.ObjectId, ref: 'Proyecto' }],

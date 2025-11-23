@@ -33,6 +33,7 @@ export default function Navbar() {
 
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();  
+  const isAdmin = user?.TipoUsuario === 1;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -170,6 +171,18 @@ export default function Navbar() {
                   >
                     Mis Proyectos
                   </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        navigate("/admin");
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-[#ffdf5b] hover:text-black"
+                    >
+                      Panel de Administración
+                    </button>
+                  )}
+
                   <button
                     onClick={() => {
                       handleLogout();
@@ -263,6 +276,7 @@ export default function Navbar() {
                     Mi Cuenta
                   </button>
                 </li>
+
                 <li>
                   <button
                     onClick={() => {
@@ -273,6 +287,9 @@ export default function Navbar() {
                     Mis Proyectos
                   </button>
                 </li>
+              
+
+                
                 <li>
                   <button
                     onClick={() => {
