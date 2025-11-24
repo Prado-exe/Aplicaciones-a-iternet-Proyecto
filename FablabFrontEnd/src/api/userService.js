@@ -25,3 +25,62 @@ export async function loginUser(credentials) {
   if (!res.ok) throw new Error(data.message || "Error al iniciar sesión");
   return data;
 }
+
+// obtener Perfil usuario 
+export async function getProfile(token) {
+  const res = await fetch(`${API_URL}/users/perfil`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, //Recuperar el token
+    },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || data.message || "Error al obtener perfil");
+  }
+
+  return data.data; 
+}
+
+//Actualizar el perfil de usuario
+export async function updateProfile(token, payload) {
+  const res = await fetch(`${API_URL}/users/perfil`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || data.message || "Error al actualizar perfil");
+  }
+
+  return data.data; // el usuario actualizado
+}
+
+//Actualizar Contraseña del usuario
+export async function changePassword(token, currentPassword, newPassword) {
+  const res = await fetch(`${API_URL}/users/cambiar-password`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || data.message || "Error al cambiar contraseña");
+  }
+
+  return data.data; 
+}

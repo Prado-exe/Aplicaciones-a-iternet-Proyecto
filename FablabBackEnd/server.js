@@ -36,15 +36,35 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// Importar rutas
+// ------------------Importar rutas-----------------------//
+
+//Ruta de usuario
 const userRoutes = require('./routes/users');
 app.use('/api/users', userRoutes);
+
+//Ruta de proyectos
+const proyectoRoutes = require('./routes/proyectos');
+app.use('/api/proyectos', proyectoRoutes);
+
 
 // Manejo de errores 404
 app.use((req, res) => {
   res.status(404).json({ 
     error: 'Ruta no encontrada',
     path: req.path 
+  });
+});
+
+// Middleware global de manejo de errores
+app.use((err, req, res, next) => {
+  console.error("Error capturado:", err);
+
+  const status = err.status || 500;
+
+  res.status(status).json({
+    ok: false,
+    message: err.message || 'Error interno del servidor',
+    errors: err.errors || null,
   });
 });
 

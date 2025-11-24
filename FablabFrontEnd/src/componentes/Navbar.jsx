@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/FABLABHorizaontalBlanco.svg";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../styles/Navbar.css";
+import { useAuth } from "../context/AuthContext";
 
 // 🔹 Clases para los links del menú (versión desktop)
 const navLinkClass = ({ isActive }) =>
@@ -28,15 +29,12 @@ const navLinkClassMobile = ({ isActive }) =>
 export default function Navbar() {
   const [open, setOpen] = useState(false); // menú móvil
   const [isScrolled, setIsScrolled] = useState(false);
-  const [user, setUser] = useState(null); // datos del usuario logueado
   const [userMenuOpen, setUserMenuOpen] = useState(false); // menú del avatar
+
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();  
 
   useEffect(() => {
-    // Cargar usuario desde localStorage al montar el Navbar
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) setUser(JSON.parse(savedUser));
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 30);
       setUserMenuOpen(false); // cierro el menú de usuario si hago scroll
@@ -65,12 +63,10 @@ export default function Navbar() {
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
-    setUserMenuOpen(false);
-    navigate("/");
+  const handleLogout = () => { //Si deslogea
+    logout(); //Borramos user,token y limpiamos localstorage
+    setUserMenuOpen(false); // cierra menú del avatar
+    navigate('/');
   };
 
   // Nombre que vamos a mostrar (Nickname > primer nombre > "Usuario")
@@ -124,7 +120,7 @@ export default function Navbar() {
           </li>
 
           {/* 🔹 Si hay usuario logueado → avatar tipo GitHub + menú */}
-          {user ? (
+          {isAuthenticated ? (
             <li className="relative">
               {/* Botón avatar circular */}
               <button
@@ -252,7 +248,7 @@ export default function Navbar() {
               </NavLink>
             </li>
 
-            {user ? (
+            {isAuthenticated ? (
               <>
                 <li className="text-[#ffdf5b] font-semibold">
                   {`Conectado: ${displayName}`}

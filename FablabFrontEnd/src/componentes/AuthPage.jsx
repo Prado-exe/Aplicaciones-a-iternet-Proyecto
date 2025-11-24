@@ -2,11 +2,29 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
+import { useAuth } from "../context/AuthContext";
+import { loginUser, registerUser} from "../api/userService";
+
+
 
 export default function AuthPage() {
   // modos: "login" | "register" | "forgot"
   const [mode, setMode] = useState("login");
   const navigate = useNavigate();
+  const { login } = useAuth(); 
+
+  // Campos para login
+  const [emailLogin, setEmailLogin] = useState("");
+  const [passwordLogin, setPasswordLogin] = useState("");
+
+  // Campos para register
+  const [nombre, setNombre] = useState("");
+  const [emailRegister, setEmailRegister] = useState("");
+  const [passwordRegister, setPasswordRegister] = useState("");
+  const [nickname, setNickname] = useState("");
+
+  // Estado para mensajes de error
+  const [errorMessage, setErrorMessage] = useState("");
 
   const isLogin = mode === "login";
   const isRegister = mode === "register";
@@ -35,6 +53,48 @@ export default function AuthPage() {
     },
   };
 
+  async function onSubmitRegister(e) {
+    e.preventDefault();
+    setErrorMessage("");
+    try {
+      //CamposVacios
+      if (!nombre || !nickname || !emailRegister || !passwordRegister) {throw new Error("Todos los campos son obligatorios");}
+      
+      //Registrar Usuario
+      await registerUser({NombreUsuario: nombre,Nickname: nickname,CorreoUsuario: emailRegister,ContraUsuario: passwordRegister,});
+
+      //AutoLogin
+      const { token, user } = await loginUser({CorreoUsuario: emailRegister,ContraUsuario: passwordRegister,});
+
+      //Guardar Sesion Global y redirigir
+      login(user, token);
+      navigate("/");
+
+    } catch (error) {
+      setErrorMessage(error.message || "Error al registrarse");
+    }
+  }
+
+
+  async function onSubmitLogin(e) {
+    e.preventDefault();
+    setErrorMessage("");
+    try {
+      //Verificar existencia de credenciales
+      if (!emailLogin || !passwordLogin) {setErrorMessage("Faltan credenciales");return;}
+
+      //Logear usuario
+      const { token, user } = await loginUser({CorreoUsuario: emailLogin,ContraUsuario: passwordLogin,});
+
+      //Guardar sesion global y redirigir
+      login(user, token);
+      navigate("/");
+
+    } catch (error) {
+      setErrorMessage(error.message || "Error al iniciar sesión");
+    }
+  }
+  
   const title =
     mode === "login"
       ? "Iniciar Sesión"
@@ -54,6 +114,7 @@ export default function AuthPage() {
             animate="animate"
             exit="exit"
             className="flex flex-col gap-4 w-[320px]"
+            onSubmit={onSubmitLogin}
           >
             <label className="text-gray-200 text-sm font-semibold">
               Correo electrónico
@@ -62,6 +123,8 @@ export default function AuthPage() {
               type="email"
               placeholder="Ingresa tu correo"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={emailLogin}
+              onChange={(e) => setEmailLogin(e.target.value)}
             />
 
             <label className="text-gray-200 text-sm font-semibold">
@@ -71,6 +134,8 @@ export default function AuthPage() {
               type="password"
               placeholder="Ingresa tu contraseña"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={passwordLogin}
+              onChange={(e) => setPasswordLogin(e.target.value)}
             />
 
             {/* Link para recuperar contraseña */}
@@ -88,6 +153,10 @@ export default function AuthPage() {
             >
               Ingresar
             </button>
+
+            {errorMessage && (
+              <p className="text-red-500 text-sm">{errorMessage}</p>
+            )}
 
             <p className="text-gray-300 mt-3 text-sm text-center">
               ¿No tienes una cuenta?{" "}
@@ -121,6 +190,7 @@ export default function AuthPage() {
             animate="animate"
             exit="exit"
             className="flex flex-col gap-2 w-[320px]"
+            onSubmit={onSubmitRegister}
           >
             <label className="text-gray-200 text-sm font-semibold">
               Nombre completo
@@ -129,6 +199,8 @@ export default function AuthPage() {
               type="text"
               placeholder="Ingresa tu nombre completo"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
             />
 
             <label className="text-gray-200 text-sm font-semibold">
@@ -138,6 +210,8 @@ export default function AuthPage() {
               type="text"
               placeholder="Ingresa tu nickname"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
             />
 
             <label className="text-gray-200 text-sm font-semibold">
@@ -147,6 +221,8 @@ export default function AuthPage() {
               type="email"
               placeholder="Ingresa tu correo"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={emailRegister}
+              onChange={(e) => setEmailRegister(e.target.value)}
             />
             
             <label className="text-gray-200 text-sm font-semibold">
@@ -156,6 +232,8 @@ export default function AuthPage() {
               type="password"
               placeholder="Crea una contraseña"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={passwordRegister}
+              onChange={(e) => setPasswordRegister(e.target.value)}
             />
 
             <button
@@ -164,6 +242,10 @@ export default function AuthPage() {
             >
               Registrarse
             </button>
+
+            {errorMessage && (
+              <p className="text-red-500 text-sm">{errorMessage}</p>
+            )}
 
             <p className="text-gray-300 mt-3 text-sm text-center">
               ¿Ya tienes cuenta?{" "}
