@@ -1,0 +1,44 @@
+name: Sincroniza la URL del backend de Render con Vercel (Ante la falta de un dominio)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sync-backend-url:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout al codigo
+        uses: actions/checkout@v4
+
+      - name: Obtener URL desde Render
+        id: render_url
+        run: |
+          RENDER_INFO=$(curl -s -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }})
+          
+          # Extraer URL principal del servicio
+          RENDER_URL=$(echo $RENDER_INFO | grep -o '"url":"[^"]*' | cut -d'"' -f4)
+          
+          # Si no existe, prueba buscar en domains
+          if [ -z "$RENDER_URL" ]; then
+            RENDER_URL=$(echo $RENDER_INFO | grep -o '"domains":\[\s*"[^"]*' | cut -d'"' -f4)
+          fi
+          
+          # Si aún no existe, reconstruye
+          if [ -z "$RENDER_URL" ]; then
+            SERVICE_NAME=$(echo $RENDER_INFO | grep -o '"name":"[^"]*' | cut -d'"' -f4)
+            RENDER_URL="https://${SERVICE_NAME}.onrender.com"
+          fi
+          echo "RENDER_URL=$RENDER_URL" >> $GITHUB_ENV
+
+      - name: Actualizacion del URL
+        env:
+          GH_TOKEN: ${{ secrets.MY_GH_PERSONAL_TOKEN }}
+        run: |
+          # Actualiza el secret VITE_API_URL en GitHub (frontend)
+          gh secret set VITE_API_URL --body "$RENDER_URL" --repo ${{ github.repository }} --app actions
+
+      - name: Mensaje de feedback
+        run: |
+          echo "URL Actualizada en entorno"

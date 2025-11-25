@@ -1,0 +1,48 @@
+name: Deploy Frontend en Vercel
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'FablabFrontEnd/**'
+      - '.github/workflows/deploy-frontend.yml'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout al codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Instalar CLI de Vercel
+        run: npm install --global vercel@latest
+
+      - name: Extraer informacion de Vercel
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+
+      - name: Instalar dependencias de node
+        run: cd FablabFrontEnd && npm ci
+
+      - name: Build artefactos del projecto
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+
+      - name: Deploy a Produccion en Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+
+      - name: Deployment Success
+        run: echo "Frontend Lanzado"
