@@ -1,27 +1,53 @@
 const express = require('express');
 const router = express.Router();
-const { registrarUsuario, loginUsuario, obtenerPerfil,actualizarPerfil,cambiarPassword} = require('../controllers/userController');
-const { verificarToken } = require('../middleware/authMiddleware');
-const { verificarAdmin } = require('../middleware/adminMiddleware'); // << AÑADIDO
-const { listarUsuarios } = require('../controllers/userController');
 
-//rutas generales de usuario
+const {
+  registrarUsuario,
+  loginUsuario,
+  obtenerPerfil,
+  actualizarPerfil,
+  cambiarPassword,
+  listarUsuarios,
+  obtenerUsuarioPorId,
+  actualizarUsuarioPorAdmin,
+  eliminarUsuario
+} = require('../controllers/userController');
+
+const { verificarToken } = require('../middleware/authMiddleware');
+const { verificarAdmin } = require('../middleware/adminMiddleware');
+
+
+// ========== RUTAS DE USUARIO ==========
+
 // Registro
 router.post('/register', registrarUsuario);
+
 // Login
 router.post('/login', loginUsuario);
-// Perfil 
-router.get('/perfil', verificarToken, obtenerPerfil);
-//Metodo para editar el perfil
-router.put('/perfil', verificarToken, actualizarPerfil);
-//Metodo para editar la contraseña del perfil
-router.put("/cambiar-password", verificarToken, cambiarPassword);
 
-//rutas solamente disponibles para el admin
-router.get('/admin/usuarios', verificarToken, verificarAdmin, (req, res) => {
-  res.json({ msg: "Solo visible para admin" });
-});
+// Perfil del usuario logueado
+router.get('/perfil', verificarToken, obtenerPerfil);
+
+// Actualizar perfil
+router.put('/perfil', verificarToken, actualizarPerfil);
+
+// Cambiar contraseña
+router.put('/cambiar-password', verificarToken, cambiarPassword);
+
+
+// ========== RUTAS SOLO PARA ADMIN ==========
+
+// Listar todos los usuarios
 router.get('/listar', verificarToken, verificarAdmin, listarUsuarios);
+
+// Obtener usuario por ID
+router.get('/:id', verificarToken, verificarAdmin, obtenerUsuarioPorId);
+
+// Actualizar usuario por ID
+router.put('/:id', verificarToken, verificarAdmin, actualizarUsuarioPorAdmin);
+
+// Eliminar usuario
+router.delete('/:id', verificarToken, verificarAdmin, eliminarUsuario);
 
 
 module.exports = router;

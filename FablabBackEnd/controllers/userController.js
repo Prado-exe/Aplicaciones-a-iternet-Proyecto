@@ -47,6 +47,7 @@ exports.cambiarPassword = async (req, res, next) => {
   }
 };
 
+//admin ola
 exports.listarUsuarios = async (req, res) => {
   try {
     const usuarios = await User.find().select("-password"); // ocultar pass
@@ -57,5 +58,37 @@ exports.listarUsuarios = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: "Error obteniendo usuarios" });
+  }
+};
+
+// OBTENER USUARIO POR ID
+exports.obtenerUsuarioPorId = async (req, res) => {
+  try {
+    const usuario = await Usuario.findById(req.params.id);
+    if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    res.json({ usuario });
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener usuario" });
+  }
+};
+
+// ACTUALIZAR USUARIO POR ADMIN
+exports.actualizarUsuarioPorAdmin = async (req, res) => {
+  try {
+    await Usuario.findByIdAndUpdate(req.params.id, req.body);
+    res.json({ msg: "Usuario actualizado correctamente" });
+  } catch (err) {
+    res.status(500).json({ error: "Error al actualizar usuario" });
+  }
+};
+
+// ELIMINAR USUARIO
+exports.eliminarUsuario = async (req, res) => {
+  try {
+    await Usuario.findByIdAndDelete(req.params.id);
+    res.json({ msg: "Usuario eliminado correctamente" });
+  } catch (err) {
+    res.status(500).json({ error: "Error al eliminar usuario" });
   }
 };

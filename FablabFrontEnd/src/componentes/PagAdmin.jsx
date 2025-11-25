@@ -1,11 +1,33 @@
 import React, { useState } from "react";
 import CrearEvento from "./CrearEvento.jsx";
 import ListarUsuarios from "./ListarUsuarios.jsx";
+import UsuarioDetalle from "./usuarioDetalle.jsx";
 
 export default function PagAdmin() {
   const [seccionActiva, setSeccionActiva] = useState("carrusel");
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
 
   const renderContenido = () => {
+    // Si estamos en "listar-usuarios", detectamos si mostrar lista o detalle
+    if (seccionActiva === "listar-usuarios") {
+      if (usuarioSeleccionado) {
+        return (
+          <UsuarioDetalle
+            userId={usuarioSeleccionado}
+            onVolver={() => setUsuarioSeleccionado(null)}
+          />
+
+        );
+      }
+
+      return (
+        <ListarUsuarios
+          onSeleccionarUsuario={(user) => setUsuarioSeleccionado(user)}
+        />
+      );
+    }
+
+    // Otras secciones normales
     switch (seccionActiva) {
       case "carrusel":
         return <p className="opacity-90">Aquí puedes editar imágenes, títulos y textos del carrusel principal.</p>;
@@ -19,14 +41,8 @@ export default function PagAdmin() {
       case "reservas":
         return <p className="opacity-90">Panel para gestionar las reservas de máquinas o espacios.</p>;
 
-      case "usuarios":
-        return <p className="opacity-90">Administración de usuarios: roles, permisos, bloqueos, etc.</p>;
-
       case "eventos":
         return <CrearEvento />;
-
-      case "listar-usuarios":
-        return <ListarUsuarios />;
 
       default:
         return <p className="opacity-90">Seleccione una sección del panel izquierdo.</p>;
@@ -42,66 +58,27 @@ export default function PagAdmin() {
           <h2 className="text-xl font-bold mb-4">Secciones del Panel</h2>
 
           <ul className="space-y-3">
-            <li>
-              <button
-                className={`w-full text-left p-3 rounded-xl transition 
-                ${seccionActiva === "carrusel" ? "bg-yellow-600 text-black" : "bg-[#1b1b1f]"}`}
-                onClick={() => setSeccionActiva("carrusel")}
-              >
-                Carrusel Principal
-              </button>
-            </li>
-
-            <li>
-              <button
-                className={`w-full text-left p-3 rounded-xl transition 
-                ${seccionActiva === "cursos" ? "bg-yellow-600 text-black" : "bg-[#1b1b1f]"}`}
-                onClick={() => setSeccionActiva("cursos")}
-              >
-                Gestión de Cursos
-              </button>
-            </li>
-
-            <li>
-              <button
-                className={`w-full text-left p-3 rounded-xl transition 
-                ${seccionActiva === "proyectos" ? "bg-yellow-600 text-black" : "bg-[#1b1b1f]"}`}
-                onClick={() => setSeccionActiva("proyectos")}
-              >
-                Proyectos Relevantes
-              </button>
-            </li>
-
-            <li>
-              <button
-                className={`w-full text-left p-3 rounded-xl transition 
-                ${seccionActiva === "reservas" ? "bg-yellow-600 text-black" : "bg-[#1b1b1f]"}`}
-                onClick={() => setSeccionActiva("reservas")}
-              >
-                Reservas
-              </button>
-            </li>
-
-            <li>
-              <button
-                className={`w-full text-left p-3 rounded-xl transition 
-                ${seccionActiva === "listar-usuarios" ? "bg-yellow-600 text-black" : "bg-[#1b1b1f]"}`}
-                onClick={() => setSeccionActiva("listar-usuarios")}
-              >
-                Ver Usuarios
-              </button>
-            </li>
-
-
-            <li>
-              <button
-                className={`w-full text-left p-3 rounded-xl transition 
-                ${seccionActiva === "eventos" ? "bg-yellow-600 text-black" : "bg-[#1b1b1f]"}`}
-                onClick={() => setSeccionActiva("eventos")}
-              >
-                Eventos
-              </button>
-            </li>
+            {[
+              { id: "carrusel", label: "Carrusel Principal" },
+              { id: "cursos", label: "Gestión de Cursos" },
+              { id: "proyectos", label: "Proyectos Relevantes" },
+              { id: "reservas", label: "Reservas" },
+              { id: "listar-usuarios", label: "Ver Usuarios" },
+              { id: "eventos", label: "Eventos" },
+            ].map((item) => (
+              <li key={item.id}>
+                <button
+                  className={`w-full text-left p-3 rounded-xl transition 
+                  ${seccionActiva === item.id ? "bg-yellow-600 text-black" : "bg-[#1b1b1f]"}`}
+                  onClick={() => {
+                    setSeccionActiva(item.id);
+                    setUsuarioSeleccionado(null); // Reset al cambiar de sección
+                  }}
+                >
+                  {item.label}
+                </button>
+              </li>
+            ))}
           </ul>
         </div>
 
