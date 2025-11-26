@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { crearEvento } = require("../controllers/eventoController");
+const { crearEvento, getAllEventos } = require("../controllers/eventoController");
 const { verificarToken } = require("../middleware/authMiddleware");
+module.exports = router;
+
 
 // Solo administradores
 router.post("/crear", verificarToken, (req, res, next) => {
@@ -11,4 +13,6 @@ router.post("/crear", verificarToken, (req, res, next) => {
   next();
 }, crearEvento);
 
-module.exports = router;
+// Ruta pública para obtener todos los eventos
+router.get("/", getAllEventos);
+

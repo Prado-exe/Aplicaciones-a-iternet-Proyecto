@@ -19,6 +19,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/eventos", require("./routes/EventoRoutes"));
 app.use("/api/users", require("./routes/users.js"));
 
+//esta ruta es ultra experimental para el carrusel, espero no explote xd
+app.use("/api/carrusel", require("./routes/carruselRoutes"));
+
 //ruas de testeo para ver si se consulta bien la bd
 
 // Rutas de prueba

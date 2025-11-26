@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import CrearEvento from "./CrearEvento.jsx";
 import ListarUsuarios from "./ListarUsuarios.jsx";
 import UsuarioDetalle from "./usuarioDetalle.jsx";
+import AdminCarrusel from "./AdminCarrusel.jsx"; // ✅ Importamos
 
 export default function PagAdmin() {
   const [seccionActiva, setSeccionActiva] = useState("carrusel");
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
 
   const renderContenido = () => {
-    // Si estamos en "listar-usuarios", detectamos si mostrar lista o detalle
     if (seccionActiva === "listar-usuarios") {
       if (usuarioSeleccionado) {
         return (
@@ -16,7 +16,6 @@ export default function PagAdmin() {
             userId={usuarioSeleccionado}
             onVolver={() => setUsuarioSeleccionado(null)}
           />
-
         );
       }
 
@@ -27,9 +26,11 @@ export default function PagAdmin() {
       );
     }
 
-    // Otras secciones normales
     switch (seccionActiva) {
-      case "carrusel":
+      case "carrusel": // ✅ Nueva sección
+        return <AdminCarrusel />;
+
+      case "gestion index":
         return <p className="opacity-90">Aquí puedes editar imágenes, títulos y textos del carrusel principal.</p>;
 
       case "cursos":
@@ -59,7 +60,8 @@ export default function PagAdmin() {
 
           <ul className="space-y-3">
             {[
-              { id: "carrusel", label: "Carrusel Principal" },
+              { id: "carrusel", label: "Configurar Carrusel" }, // ✅ Nuevo botón
+              { id: "gestion index", label: "gestion index" },
               { id: "cursos", label: "Gestión de Cursos" },
               { id: "proyectos", label: "Proyectos Relevantes" },
               { id: "reservas", label: "Reservas" },
@@ -72,7 +74,7 @@ export default function PagAdmin() {
                   ${seccionActiva === item.id ? "bg-yellow-600 text-black" : "bg-[#1b1b1f]"}`}
                   onClick={() => {
                     setSeccionActiva(item.id);
-                    setUsuarioSeleccionado(null); // Reset al cambiar de sección
+                    setUsuarioSeleccionado(null);
                   }}
                 >
                   {item.label}
