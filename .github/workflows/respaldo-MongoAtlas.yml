@@ -1,0 +1,86 @@
+name: Respaldo de la DB de MongoAtlas en Google Drive
+
+on:
+  #schedule:
+    # Ejecutar diariamente a las 2:00 AM UTC
+    # Para La Serena (UTC-3): equivale a 23:00 (11 PM) del día anterior
+    #- cron: '0 2 * * *'
+  
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Descarga el repo
+        uses: actions/checkout@v4
+      
+      - name: Instala MongoDBTools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mongodb-database-tools
+      
+      - name: Crea carpeta temporal del respaldo
+        run: |
+          mkdir -p backups
+      
+      - name: Ejecucion del mongodump
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        run: |
+          BACKUP_DATE=$(date +'%Y-%m-%d_%H-%M-%S')
+          BACKUP_NAME="mongodb_backup_$BACKUP_DATE"
+
+          mongodump \
+            --uri="$MONGODB_URI" \
+            --out="backups/$BACKUP_NAME" \
+            --forceTableScan
+          
+          if [ $? -eq 0 ]; then
+            echo "Respaldo local temporal completado"
+          else
+            echo "Error en respaldo local"
+            exit 1
+          fi
+          
+          echo "BACKUP_NAME=$BACKUP_NAME" >> $GITHUB_ENV
+      
+      - name: Compresion del respaldo
+        run: |
+          cd backups
+          BACKUP_NAME=${{ env.BACKUP_NAME }}
+          
+          tar -czf "$BACKUP_NAME.tar.gz" "$BACKUP_NAME"
+          rm -rf "$BACKUP_NAME"
+          
+          echo "BACKUP_FILE=$BACKUP_NAME.tar.gz" >> $GITHUB_ENV
+      
+      - name: Subir a Google Drive
+        env:
+          GDRIVE_ACCESS_TOKEN: ${{ secrets.GDRIVE_ACCESS_TOKEN }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: |
+          BACKUP_FILE=${{ env.BACKUP_FILE }}
+          
+          # Subir archivo a Google Drive mediante API
+          RESPONSE=$(curl -X POST \
+            -H "Authorization: Bearer $GDRIVE_ACCESS_TOKEN" \
+            -F "metadata={\"name\":\"$BACKUP_FILE\", \"parents\":[\"$GDRIVE_FOLDER_ID\"]};type=application/json" \
+            -F "file=@backups/$BACKUP_FILE" \
+            https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart)
+          
+          echo "$RESPONSE" | grep -q "id" && echo "Archivo subido a Google Drive. " || echo "Subida completada"
+      
+      - name: Summary
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "RESPALDO COMPLETADO"
+          echo "=========================================="
+      
+      - name: Limpieza de archivos temporales
+        if: always()
+        run: |
+          rm -rf backups/
+          echo "🧹 Limpieza completada"
