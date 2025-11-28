@@ -2,8 +2,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
-import { handleRegister, handleLogin } from "../controllers/userController"; 
 import { useAuth } from "../context/AuthContext";
+import { loginUser, registerUser,requestPasswordReset} from "../api/userService";
+
+
 
 export default function AuthPage() {
   // modos: "login" | "register" | "forgot"
@@ -20,6 +22,12 @@ export default function AuthPage() {
   const [emailRegister, setEmailRegister] = useState("");
   const [passwordRegister, setPasswordRegister] = useState("");
   const [nickname, setNickname] = useState("");
+
+  // Campos para "olvidé mi contraseña"
+  const [emailForgot, setEmailForgot] = useState("");
+
+  // Mensaje informativo 
+  const [infoMessage, setInfoMessage] = useState("");
 
   // Estado para mensajes de error
   const [errorMessage, setErrorMessage] = useState("");
@@ -55,14 +63,16 @@ export default function AuthPage() {
     e.preventDefault();
     setErrorMessage("");
     try {
-      const { user, token } = await handleRegister({
-        nombre,
-        nickname,
-        correo: emailRegister,
-        contraseña: passwordRegister,
-      });
+      //CamposVacios
+      if (!nombre || !nickname || !emailRegister || !passwordRegister) {throw new Error("Todos los campos son obligatorios");}
+      
+      //Registrar Usuario
+      await registerUser({NombreUsuario: nombre,Nickname: nickname,CorreoUsuario: emailRegister,ContraUsuario: passwordRegister,});
 
       //AutoLogin
+      const { token, user } = await loginUser({CorreoUsuario: emailRegister,ContraUsuario: passwordRegister,});
+
+      //Guardar Sesion Global y redirigir
       login(user, token);
       navigate("/");
 
@@ -76,17 +86,44 @@ export default function AuthPage() {
     e.preventDefault();
     setErrorMessage("");
     try {
-      const { user, token } = await handleLogin({
-        correo: emailLogin,
-        contraseña: passwordLogin,
-      });
+      //Verificar existencia de credenciales
+      if (!emailLogin || !passwordLogin) {setErrorMessage("Faltan credenciales");return;}
+
+      //Logear usuario
+      const { token, user } = await loginUser({CorreoUsuario: emailLogin,ContraUsuario: passwordLogin,});
+
+      //Guardar sesion global y redirigir
       login(user, token);
       navigate("/");
+
     } catch (error) {
       setErrorMessage(error.message || "Error al iniciar sesión");
     }
   }
   
+  //Campo para enviarCorreo de recuperacion
+  async function onSubmitForgot(e) {
+  e.preventDefault();
+  setErrorMessage("");
+  setInfoMessage("");
+
+  if (!emailForgot.trim()) {
+    setErrorMessage("Debes ingresar un correo");
+    return;
+  }
+
+  try {
+    const res = await requestPasswordReset(emailForgot.trim());
+    setInfoMessage(
+      res.message || "Si el correo está registrado, recibirás instrucciones."
+    );
+  } catch (error) {
+    setErrorMessage(
+      error.message || "Ocurrió un error al solicitar la recuperación"
+    );
+  }
+}
+
   const title =
     mode === "login"
       ? "Iniciar Sesión"
@@ -271,6 +308,7 @@ export default function AuthPage() {
             animate="animate"
             exit="exit"
             className="flex flex-col gap-4 w-[320px]"
+            onSubmit={onSubmitForgot}     //Submit de recuperar          
           >
             <label className="text-gray-200 text-sm font-semibold">
               Correo electrónico
@@ -279,12 +317,23 @@ export default function AuthPage() {
               type="email"
               placeholder="Ingresa el correo con el que te registraste"
               className="p-3 rounded-md bg-gray-800/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              value={emailForgot} 
+              onChange={(e) => setEmailForgot(e.target.value)}
             />
 
             <p className="text-xs text-gray-300">
               Recibirás un correo con instrucciones para restablecer tu
               contraseña
             </p>
+
+            {/* Mensajes de error / éxito */}
+            {errorMessage && (
+              <p className="text-red-500 text-xs">{errorMessage}</p>
+            )}
+
+            {infoMessage && (
+              <p className="text-green-400 text-xs">{infoMessage}</p>
+            )}
 
             <button
               type="submit"
@@ -296,7 +345,11 @@ export default function AuthPage() {
             <p className="text-gray-300 mt-3 text-sm text-center">
               ¿Recordaste tu contraseña?{" "}
               <span
-                onClick={() => setMode("login")}
+                onClick={() => {
+                  setMode("login");
+                  setErrorMessage("");
+                  setInfoMessage("");
+                }}
                 className="text-yellow-400 hover:underline cursor-pointer"
               >
                 Inicia sesión
@@ -309,7 +362,11 @@ export default function AuthPage() {
               initial="initial"
               animate="animate"
               className="text-gray-400 text-sm mt-2 cursor-pointer hover:text-yellow-400 transition text-left"
-              onClick={() => navigate("/")}
+              onClick={() => {
+                setErrorMessage("");
+                setInfoMessage("");
+                navigate("/");
+              }}
             >
               ← Volver al inicio
             </motion.p>

@@ -22,26 +22,24 @@ const proyectoSchema = new mongoose.Schema({
     maxlength: [1000, 'La descripción no debe superar los 1000 caracteres'],
   },
 
-  RutaImagenProyecto: {
-    type: String,
-    trim: true,
-    default: null,
-  },
-
-  // Componentes del proyecto (lista de materiales, partes, etc.)
-  Componentes: [
+  imagenes: [
     {
-        IDR_Componente: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Inventario',
-        },
-        Cantidad: {
-            type: Number,
-            min: [1, 'La cantidad mínima es 1'],
-            default: 1,
-      },
+      _id: false,
+      url: { type: String },
+      publicId: { type: String },
     },
   ],
+
+  archivos: [
+  {
+    _id: false,
+    url: { type: String, required: true },
+    publicId: { type: String },
+    mimeType: { type: String },
+    originalName: { type: String },
+  },
+  ],
+
 
   FechaCreacion: {
     type: Date,

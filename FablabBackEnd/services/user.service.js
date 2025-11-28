@@ -4,6 +4,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Solicitudes = require('../models/Solicitudes');
 const Proyecto = require('../models/Proyecto');
+const crypto = require("crypto");
+const transporter = require("../config/email"); // nodemailer
+
 
 //Crear Usuario
 exports.createUser = async ({ NombreUsuario, Nickname, CorreoUsuario, ContraUsuario }) => {
@@ -225,3 +228,92 @@ exports.changePassword = async (userId, { currentPassword, newPassword }) => {
 
   return { message: "Contraseña actualizada correctamente" };
 };
+
+
+exports.forgotPassword = async ({ email }) => {
+
+  if (!email) {
+    const e = new Error("Debes ingresar un correo");
+    e.status = 400;
+    throw e;
+  }
+
+  //Normaliza el correo
+  const correoNormalizado = email.trim().toLowerCase();
+
+  //Buscamos si existe en la bd
+  const user = await Usuario.findOne({ CorreoUsuario: correoNormalizado });
+  if (!user) return;
+
+  //Generar token aleatorio y su expiracion
+  const token = crypto.randomBytes(32).toString("hex"); //Cadena aleatoria
+  const expires = Date.now() + 60 * 60 * 1000; // 1 hora
+
+  //Agregamos a user
+  user.passwordResetToken = token;
+  user.passwordResetExpires = new Date(expires);
+
+  //Guardamos en bd
+  await user.save(); 
+
+  //Para redirigir al usuario(url)
+  const baseUrl = process.env.FRONT_URL || "http://localhost:5173";
+  const resetLink = `${baseUrl}/reset-password?token=${token}`;
+
+  // Enviar correo
+  await transporter.sendMail({
+    from: `"FabLab" <${process.env.SMTP_USER}>`,
+    to: correoNormalizado,
+    subject: "Recuperación de contraseña - FabLab",
+    html: `
+      <p>Hola,</p>
+      <p>Recibimos una solicitud para restablecer tu contraseña en el sistema del FabLab.</p>
+      <p>Puedes establecer una nueva contraseña haciendo clic en el siguiente enlace:</p>
+      <p><a href="${resetLink}">${resetLink}</a></p>
+      <p>Este enlace es válido por 1 hora.</p>
+    `,
+  });
+};
+
+//Establecer nueva contraseña
+exports.resetPassword = async ({ token, newPassword }) => {
+
+  //Verificar existencia de token y nueva password
+  if (!token || !newPassword) {
+    const e = new Error("Faltan datos (token o nueva contraseña)");
+    e.status = 400;
+    throw e;
+  }
+
+  //Respetar las reglas del modelo
+  if (newPassword.length < 8) {
+    const e = new Error("La nueva contraseña debe tener al menos 8 caracteres");
+    e.status = 400;
+    throw e;
+  }
+
+  // Buscar usuario con ese token y que no este vencido
+  const user = await Usuario.findOne({
+    //Mismo token
+    passwordResetToken: token,
+    //Mayor que el hora actual (dentro del plazo de 1h)
+    passwordResetExpires: { $gt: new Date() }, 
+  });
+
+  if (!user) {
+    const e = new Error("Token inválido o expirado");
+    e.status = 400;
+    throw e;
+  }
+
+  //Actualiza la contra
+  user.ContraUsuario = newPassword;
+
+  // Limpiar token y expiración
+  user.passwordResetToken = null;
+  user.passwordResetExpires = null;
+
+  await user.save(); //Actualizamos documento del usuario en mongo
+  return { message: "Contraseña actualizada correctamente" };
+};
+

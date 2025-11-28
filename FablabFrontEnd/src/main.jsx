@@ -22,6 +22,7 @@ import AuthPage from "./componentes/AuthPage.jsx";
 import PagMiCuenta from "./componentes/PagMiCuenta.jsx";
 import PagMisProyectos from "./componentes/PagMisProyectos.jsx";
 import PagAdmin from "./componentes/PagAdmin.jsx";
+import ResetPassword from "./componentes/ResetPassword";
 
 
 //estas componentes las cree para probar las rutas de admin 
@@ -95,6 +96,14 @@ function AnimatedRoutes() {
           element={
             <motion.div {...pageTransition}>
               <AuthPage />
+            </motion.div>
+          }
+        />
+        <Route //ResetPassword prototipo
+          path="/reset-password"
+          element={
+            <motion.div {...pageTransition}>
+              <ResetPassword />
             </motion.div>
           }
         />

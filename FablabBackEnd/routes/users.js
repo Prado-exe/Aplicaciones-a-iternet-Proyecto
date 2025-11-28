@@ -10,9 +10,10 @@ const {
   listarUsuarios,
   obtenerUsuarioPorId,
   actualizarUsuarioPorAdmin,
-  eliminarUsuario
+  eliminarUsuario,
+  forgotPassword,
+  resetPassword
 } = require('../controllers/userController');
-
 const { verificarToken } = require('../middleware/authMiddleware');
 const { verificarAdmin } = require('../middleware/adminMiddleware');
 
@@ -49,5 +50,8 @@ router.put('/:id', verificarToken, verificarAdmin, actualizarUsuarioPorAdmin);
 // Eliminar usuario
 router.delete('/:id', verificarToken, verificarAdmin, eliminarUsuario);
 
+//Para Resetar Contraseñas
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 module.exports = router;

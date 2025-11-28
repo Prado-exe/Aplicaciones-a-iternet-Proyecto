@@ -84,3 +84,42 @@ export async function changePassword(token, currentPassword, newPassword) {
 
   return data.data; 
 }
+
+
+// Solicitar correo de recuperacion
+export async function requestPasswordReset(email) {
+  const res = await fetch(`${API_URL}/users/forgot-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Error al solicitar recuperación de contraseña");
+  }
+
+  return data; 
+}
+
+// Enviar nueva contraseña usando el token
+export async function resetPasswordApi(token, newPassword) {
+  const res = await fetch(`${API_URL}/users/reset-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ token, newPassword }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Error al restablecer contraseña");
+  }
+
+  return data; // { success: true, message: "Contraseña actualizada correctamente" }
+}

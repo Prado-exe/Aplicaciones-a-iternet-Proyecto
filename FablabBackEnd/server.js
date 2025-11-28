@@ -10,10 +10,15 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 // Middleware
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",").map(o => o.trim())
+  : ["http://localhost:5173"];
+
 app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
+  origin: allowedOrigins,
+  credentials: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/eventos", require("./routes/EventoRoutes"));
@@ -43,9 +48,16 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// Importar rutas
+// ------------------Importar rutas-----------------------//
+
+//Ruta de usuario
 const userRoutes = require('./routes/users');
 app.use('/api/users', userRoutes);
+
+//Ruta de proyectos
+const proyectoRoutes = require('./routes/proyectos');
+app.use('/api/proyectos', proyectoRoutes);
+
 
 // Manejo de errores 404
 app.use((req, res) => {
