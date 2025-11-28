@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registrarUsuario, loginUsuario, obtenerPerfil,actualizarPerfil,cambiarPassword} = require('../controllers/userController');
+const { registrarUsuario, loginUsuario, obtenerPerfil,actualizarPerfil,cambiarPassword,forgotPassword,resetPassword} = require('../controllers/userController');
 const { verificarToken } = require('../middleware/authMiddleware');
 
 // Registro
@@ -18,5 +18,8 @@ router.put('/perfil', verificarToken, actualizarPerfil);
 //Metodo para editar la contraseña del perfil
 router.put("/cambiar-password", verificarToken, cambiarPassword);
 
+//Para Resetar Contraseñas
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 module.exports = router;

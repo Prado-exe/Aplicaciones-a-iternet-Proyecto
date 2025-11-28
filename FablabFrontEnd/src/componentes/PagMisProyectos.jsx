@@ -2,13 +2,16 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import UniqueDivider from "./UniqueDivider";
 import { useAuth } from "../context/AuthContext";
-import { getMyProjects, createProject,deleteProject } from "../api/proyectService";
+import { getMyProjects, createProject,/*deleteProject*/downloadProjectFile} from "../api/proyectService";
 
 
 const LOCAL_KEY = "portfolioEntriesFabLab";
 
 const PagMisProyectos = () => {
+  //Estado para visualizar imagen mas grande de Detalle proyectos
+  const [zoomImage, setZoomImage] = useState(null);
 
+  //Autenticacion de usuario
   const { user, token, isAuthenticated } = useAuth();
   
   // Historial de registros en el FabLab (modo demo)
@@ -20,15 +23,21 @@ const PagMisProyectos = () => {
   // Formulario de nuevo registro
   const [formData, setFormData] = useState({
     titulo: "", 
-    tecnologias: "",
     descripcion: "",
   });
 
-  // Manejo simple de imágenes (URLs) para el registro nuevo
-  const [newImageUrl, setNewImageUrl] = useState("");
-  const [tempImages, setTempImages] = useState([]);
+  // Manejo simple de imágenes 
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  
+  //Para limitar candtidad de Archivos/Imagenes
+  const MAX_IMAGES = 3;
+  const MAX_FILES = 2;
 
-  // Cargar proyectos reales desde el backend
+  const [fileFiles, setFileFiles] = useState([]);
+  const [filePreviews, setFilePreviews] = useState([]); 
+  
+  // Cargar y guardar una copia en el front de los proyectos consultando al backend
   useEffect(() => {
     // Si no hay token, no llamamos api
     if (!token) return;
@@ -37,16 +46,20 @@ const PagMisProyectos = () => {
       try {
         const proyectos = await getMyProjects(token);
 
-        // Mapeo sencillo: adapto nombres del backend a los que usa la UI
+        // Mapeo
         const mapped = proyectos.map((p) => ({
-          id: p._id, // id de Mongo
+          id: p._id,
           titulo: p.NombreProyecto,
           descripcion: p.DescripcionProyecto || "",
-          // Campos extra pueden venir de backend en el futuro
-          imagenes: [], // por ahora vacío, porque aún no lo guardas en BD
-          fecha: p.FechaCreacion
-            ? new Date(p.FechaCreacion).toLocaleDateString()
-            : "",
+          // solo URLs de imagenes 
+          imagenes: Array.isArray(p.imagenes) && p.imagenes.length > 0
+            ? p.imagenes.map((img) => img.url)
+            : [],
+          // objetos completos para archivos
+          archivos: Array.isArray(p.archivos) && p.archivos.length > 0
+            ? p.archivos
+            : [],
+          fecha: p.FechaCreacion ? new Date(p.FechaCreacion).toLocaleDateString() : "",
           hora: p.FechaCreacion
             ? new Date(p.FechaCreacion).toLocaleTimeString([], {
                 hour: "2-digit",
@@ -54,10 +67,10 @@ const PagMisProyectos = () => {
               })
             : "",
         }));
-
+        //Guardamos en setEntries cada documento de la coleccion proyectos 
         setEntries(mapped);
         if (mapped.length > 0) {
-          setSelectedId(mapped[0].id);
+          setSelectedId(mapped[0].id); //Guarda id de los proyectos de mongodb
         }
       } catch (err) {
         console.error("Error cargando proyectos:", err);
@@ -81,64 +94,145 @@ const PagMisProyectos = () => {
     }));
   };
 
-  const handleAddImageUrl = () => {
-    const trimmed = newImageUrl.trim();
-    if (!trimmed) return;
-    setTempImages((prev) => [...prev, trimmed]);
-    setNewImageUrl("");
-  };
 
-  const handleRemoveTempImage = (url) => {
-    setTempImages((prev) => prev.filter((u) => u !== url));
-  };
+  const handleFileChange = (e) => {
+    //Leer archivos selecionados
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-  const persistEntries = (list) => {
-    setEntries(list);
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(list));
-  };
+    //variables para separar entre imagenes y otros archivos
+    const imageCandidates = [];
+    const fileCandidates = [];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    //Filtrar en base al tipo de archivo (Imagen/archivo)
+    files.forEach((file) => {
+      if (file.type && file.type.startsWith("image/")) {
+        // ej: "image/png", "image/jpeg"
+        imageCandidates.push(file);
+      } else {
+        // todo lo que no sea image/*
+        fileCandidates.push(file);
+      }
+    });
 
-    if (!formData.titulo.trim()) return;
+    //Agregar IMÁGENES candidatas al setImageFiles -> Para mandar al backend -> estos se usaran en handlesubmit
+    setImageFiles((prevFiles) => {
+      const availableSlots = MAX_IMAGES - prevFiles.length;
+      if (availableSlots <= 0) return prevFiles;
 
-    try {
-      // 1) Mandar al backend con los nombres que espera tu servicio
-      const created = await createProject(token, {
-        NombreProyecto: formData.titulo.trim(),
-        DescripcionProyecto: formData.descripcion.trim(),
+      const toAdd = imageCandidates.slice(0, availableSlots);
+      return [...prevFiles, ...toAdd];
+    });
+
+    //Guarda las imagenes en el preview -> Para mostrar en UI al seleccionar una imagen
+    setImagePreviews((prevPreviews) => {
+      const availableSlots = MAX_IMAGES - prevPreviews.length;
+      if (availableSlots <= 0) return prevPreviews;
+
+      const toAdd = imageCandidates
+        .slice(0, availableSlots)
+        .map((file) => ({
+          url: URL.createObjectURL(file),
+          name: file.name,
+          type: file.type,
+        }));
+
+      return [...prevPreviews, ...toAdd];
+    });
+
+    //Misma logica que en imagenes
+    if (fileCandidates.length > 0) {
+      
+      setFileFiles((prev) => {
+        const availableSlots = MAX_FILES - prev.length;
+        if (availableSlots <= 0) return prev;
+
+        const toAdd = fileCandidates.slice(0, availableSlots);
+        return [...prev, ...toAdd];
       });
 
-      const createdDate = created.FechaCreacion
-        ? new Date(created.FechaCreacion)
-        : new Date();
+      setFilePreviews((prev) => {
+        const availableSlots = MAX_FILES - prev.length;
+        if (availableSlots <= 0) return prev;
 
-      const newEntry = {
-        id: created._id,
-        titulo: created.NombreProyecto,
-        descripcion: created.DescripcionProyecto || "",
-        imagenes: tempImages, // de momento solo en frontend
-        fecha: createdDate.toLocaleDateString(),
-        hora: createdDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
+        const toAdd = fileCandidates.slice(0, availableSlots).map((file) => ({
+          name: file.name,
+          type: file.type,
+        }));
 
-      const updated = [newEntry, ...entries];
-      setEntries(updated);
-      setSelectedId(newEntry.id);
-
-      // 3) Limpiar formulario
-      setFormData({
-        titulo: "",
-        tecnologias: "",
-        descripcion: "",
+        return [...prev, ...toAdd];
       });
-      setTempImages([]);
-      setNewImageUrl("");
-    } catch (err) {
-      console.error("Error al crear proyecto:", err);
-      // Aquí podrías mostrar un mensaje de error en pantalla si quieres
     }
+
   };
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!formData.titulo.trim()) return;
+
+  try {
+    //Mandar al backend con los inputs de la UI
+    const created = await createProject(token, {
+      NombreProyecto: formData.titulo.trim(),
+      DescripcionProyecto: formData.descripcion.trim(),
+      imagenFiles: imageFiles,
+      archivoFiles: fileFiles,   
+    });
+
+    console.log("Respuesta al crear proyecto:", created); 
+
+    //Con el objeto created(Respuesta devuelta por la bd) extraigo la informacion
+
+    const createdDate = created.FechaCreacion
+      ? new Date(created.FechaCreacion)
+      : new Date();
+
+    // Normalizar imágenes que vienen del backend
+    const imagenes =
+      Array.isArray(created.imagenes) && created.imagenes.length > 0
+        ? created.imagenes.map((img) => img.url)
+        : created.imagen?.url
+          ? [created.imagen.url]
+          : [];
+
+    const archivos =
+      Array.isArray(created.archivos) && created.archivos.length > 0
+        ? created.archivos
+        : [];
+
+    //Contruimos la copia del objeto en un estado del front
+    const newEntry = {
+      id: created._id,
+      titulo: created.NombreProyecto,
+      descripcion: created.DescripcionProyecto || "",
+      imagenes,
+      archivos, 
+      fecha: createdDate.toLocaleDateString(),
+      hora: createdDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+
+    const updated = [newEntry, ...entries];
+    setEntries(updated);
+    setSelectedId(newEntry.id);
+
+    // 3) Limpiar formulario y previews
+    setFormData({
+      titulo: "",
+      descripcion: "",
+    });
+    setImageFiles([]);
+    setImagePreviews([]);
+    setFileFiles([]);
+    setFilePreviews([]);
+  } catch (err) {
+    console.error("Error al crear proyecto:", err);
+  }
+};
 
 
   const handleSelectEntry = (id) => {
@@ -146,6 +240,7 @@ const PagMisProyectos = () => {
   };
 
   const handleDeleteEntry = async (id) => {
+    /*
     try {
       //Eliminar en BD
       await deleteProject(token, id);
@@ -163,6 +258,7 @@ const PagMisProyectos = () => {
       console.error("Error eliminando proyecto:", err);
       alert("No se pudo eliminar el proyecto.");
     }
+      */
   };
 
 
@@ -193,7 +289,9 @@ const PagMisProyectos = () => {
     exit: { opacity: 0, x: -10, transition: { duration: 0.2 } },
   };
 
+
   return (
+    <>
     <div className="pt-24 min-h-screen bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] text-gray-200">
       <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col gap-10">
         {/* Título principal */}
@@ -321,7 +419,7 @@ const PagMisProyectos = () => {
                       </p>
                     </div>
 
-                    {/* Imágenes */}
+                    {/* Aqui se muestran las imagenes rescatadas directamente de cloudinary */}
                     {selectedEntry.imagenes && selectedEntry.imagenes.length > 0 && (
                       <div>
                         <p className="text-gray-400 text-xs uppercase tracking-wide mb-2">
@@ -329,20 +427,51 @@ const PagMisProyectos = () => {
                         </p>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                           {selectedEntry.imagenes.map((url, idx) => (
-                            <div
+                            <button
                               key={`${selectedEntry.id}-img-${idx}`}
-                              className="bg-[#1e1e24] rounded-xl overflow-hidden border border-yellow-500/30"
+                              type="button"
+                              onClick={() => setZoomImage(url)}  //abrir modal con esta imagen
+                              className="bg-[#1e1e24] rounded-xl overflow-hidden border border-yellow-500/30 
+                                        hover:border-yellow-400 hover:shadow-[0_0_14px_rgba(255,215,0,0.4)]
+                                        transition transform hover:-translate-y-[2px] focus:outline-none"
                             >
                               <img
                                 src={url}
                                 alt={`Imagen ${idx + 1}`}
                                 className="w-full h-28 object-cover"
                               />
-                            </div>
+                            </button>
                           ))}
                         </div>
                       </div>
                     )}
+
+
+                    {/* Archivos Rescatados de Cloudinary*/}
+                    {selectedEntry.archivos && selectedEntry.archivos.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                          Archivos asociados
+                        </p>
+                        <div className="space-y-2">
+                          {selectedEntry.archivos.map((file, idx) => (
+                            <button
+                                key={`${selectedEntry.id}-file-${idx}`}
+                                type="button"
+                                onClick={() => downloadProjectFile(token,selectedEntry.id,idx,file.originalName)}
+                                className="flex items-center gap-2 text-sm text-yellow-300 hover:text-yellow-200 underline"
+                              >
+                              <i className="bi bi-file-earmark-arrow-down" />
+                              {file.originalName || `Archivo ${idx + 1}`}
+                              <span className="text-[10px] text-gray-400">
+                                ({file.mimeType || "archivo"})
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
 
                     {/* Acciones sobre el registro */}
                     <div className="pt-2 flex justify-end">
@@ -415,50 +544,62 @@ const PagMisProyectos = () => {
               />
             </div>
 
-            {/* Imágenes (URLs por ahora, para que luego backend lo reemplace por uploads reales) */}
+            {/* Imagen del proyecto (archivo subido) */}
             <div>
               <label className="block text-sm mb-1">
-                Imágenes asociadas (URL) – modo demo
+                Imagen del proyecto (opcional)
               </label>
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 items-start">
                 <input
-                  type="text"
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  className="flex-1 rounded-xl px-3 py-2 bg-[#1b1b21] border border-yellow-500/40 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
-                  placeholder="Pega aquí la URL de una imagen (ej: de Drive, Imgur, etc.)"
+                  type="file"
+                  multiple
+                  onChange={handleFileChange}
+                  className="text-sm text-gray-300
+                            file:mr-2 file:px-3 file:py-2
+                            file:rounded-full file:border-0
+                            file:bg-yellow-500 file:text-black
+                            file:cursor-pointer
+                            file:font-semibold
+                            hover:file:bg-yellow-400"
                 />
-                <button
-                  type="button"
-                  onClick={handleAddImageUrl}
-                  className="px-4 py-2 rounded-full bg-yellow-500 text-black text-sm font-semibold hover:bg-yellow-400 transition shadow-[0_0_10px_rgba(255,215,0,0.6)]"
-                >
-                  Añadir imagen
-                </button>
               </div>
-              {tempImages.length > 0 && (
-                <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {tempImages.map((url) => (
-                    <div
-                      key={url}
-                      className="relative bg-[#1e1e24] rounded-xl overflow-hidden border border-yellow-500/30"
-                    >
-                      <img
-                        src={url}
-                        alt="Preview"
-                        className="w-full h-24 object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTempImage(url)}
-                        className="absolute top-1 right-1 text-[10px] px-2 py-1 rounded-full bg-black/70 text-gray-200 hover:bg-black"
-                      >
-                        Quitar
-                      </button>
+                {/* Previews de IMÁGENES */}
+                  {Array.isArray(imagePreviews) && imagePreviews.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-400 mb-1">Imágenes seleccionadas</p>
+                      <div className="grid grid-cols-3 gap-3">
+                        {imagePreviews.map((preview, idx) => (
+                          <div
+                            key={idx}
+                            className="w-32 rounded-xl overflow-hidden border border-yellow-500/40 bg-[#1e1e24]"
+                          >
+                            <img
+                              src={preview.url}
+                              alt={preview.name}
+                              className="w-full h-24 object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  )}
+
+                  {/* Lista de ARCHIVOS*/}
+                  {Array.isArray(filePreviews) && filePreviews.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-400 mb-1">Archivos adjuntos</p>
+                      <ul className="text-xs text-gray-300 list-disc list-inside space-y-1">
+                        {filePreviews.map((file, idx) => (
+                          <li key={idx}>
+                            {file.name}{" "}
+                            <span className="text-[10px] text-gray-500">
+                              ({file.type || "tipo desconocido"})
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
             </div>
 
             <div className="pt-2">
@@ -473,7 +614,37 @@ const PagMisProyectos = () => {
         </section>
       </div>
     </div>
-  );
+     {/*NUEVO->Modal con zoom para las imagenes de preview(detalle de cada proyecto)*/}         
+    {zoomImage && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+            onClick={() => setZoomImage(null)}
+          >
+            <div
+              className="relative max-w-3xl max-h-[90vh] mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setZoomImage(null)}
+                className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-8 h-8 
+                          flex items-center justify-center text-sm font-bold shadow-lg
+                          hover:bg-red-500 transition"
+              >
+                ✕
+              </button>
+
+              <img
+                src={zoomImage}
+                alt="Vista ampliada"
+                className="w-full max-h-[90vh] object-contain rounded-2xl border border-yellow-400/70 
+                          shadow-[0_0_30px_rgba(255,215,0,0.4)] bg-black"
+              />
+            </div>
+          </div>
+        )}
+      </>
+    );
 };
 
 export default PagMisProyectos;

@@ -41,6 +41,10 @@ const userSchema = new mongoose.Schema({
     minlength: [8, 'La contraseña debe tener al menos 8 caracteres'],
     select: false,
   },
+  
+  //Campos para recuperación de contraseña
+  passwordResetToken: { type: String, default: null },
+  passwordResetExpires: { type: Date, default: null },
 
   // Referencias a otras colecciones
   Actividades: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Actividad' }],
@@ -55,6 +59,7 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
 });
 
 // Hash antes de guardar

@@ -37,11 +37,41 @@ exports.actualizarPerfil = async (req, res, next) => {
   }
 };
 
-//Actualizar Password
+//Actualizar Password(Estando Logeado)
 exports.cambiarPassword = async (req, res, next) => {
   try {
     const data = await userService.changePassword(req.user.id, req.body);
     res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+};
+
+//Olvidar contraseña (Deslogeado)
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    await userService.forgotPassword({email});
+
+    res.json({
+      success: true,
+      message: "Si el correo está registrado, recibirás instrucciones.",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Resetear contraseña con token (desde enlace del correo)
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { token, newPassword } = req.body;
+    await userService.resetPassword({token, newPassword});
+
+    res.json({
+      success: true,
+      message: "Contraseña actualizada correctamente",
+    });
   } catch (err) {
     next(err);
   }
