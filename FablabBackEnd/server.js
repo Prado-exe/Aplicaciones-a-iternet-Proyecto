@@ -26,6 +26,9 @@ app.use("/api/users", require("./routes/users.js"));
 
 //esta ruta es ultra experimental para el carrusel, espero no explote xd
 app.use("/api/carrusel", require("./routes/carruselRoutes"));
+app.use('/api/talleres', require("./routes/talleresRoute"));
+app.use('/api/eventos', require("./routes/EventosRoutes"));
+
 
 //ruas de testeo para ver si se consulta bien la bd
 

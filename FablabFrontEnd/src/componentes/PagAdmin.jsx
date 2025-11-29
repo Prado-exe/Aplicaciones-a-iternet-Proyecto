@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import CrearEvento from "./CrearEvento.jsx";
 import ListarUsuarios from "./ListarUsuarios.jsx";
 import UsuarioDetalle from "./usuarioDetalle.jsx";
-import AdminCarrusel from "./AdminCarrusel.jsx"; // ✅ Importamos
+import AdminCarrusel from "./AdminCarrusel.jsx"; //Importamos
+import AdminTalleres from "./AdminTalleres.jsx"; //Importamos
+import AdminEventos from "./AdminEventos.jsx"; //Importamos
+
 
 export default function PagAdmin() {
   const [seccionActiva, setSeccionActiva] = useState("carrusel");
@@ -29,22 +32,16 @@ export default function PagAdmin() {
     switch (seccionActiva) {
       case "carrusel": // ✅ Nueva sección
         return <AdminCarrusel />;
-
-      case "gestion index":
-        return <p className="opacity-90">Aquí puedes editar imágenes, títulos y textos del carrusel principal.</p>;
-
-      case "cursos":
-        return <p className="opacity-90">Gestión de cursos: crear, editar, ocultar o eliminar cursos publicados.</p>;
-
+      case "talleres-modif":
+        return <AdminTalleres />;
+      case "Eventos-modif":
+        return <AdminEventos />;
       case "proyectos":
         return <p className="opacity-90">Administración de proyectos relevantes o destacados del FabLab.</p>;
-
       case "reservas":
         return <p className="opacity-90">Panel para gestionar las reservas de máquinas o espacios.</p>;
-
       case "eventos":
         return <CrearEvento />;
-
       default:
         return <p className="opacity-90">Seleccione una sección del panel izquierdo.</p>;
     }
@@ -61,8 +58,8 @@ export default function PagAdmin() {
           <ul className="space-y-3">
             {[
               { id: "carrusel", label: "Configurar Carrusel" }, // ✅ Nuevo botón
-              { id: "gestion index", label: "gestion index" },
-              { id: "cursos", label: "Gestión de Cursos" },
+              { id: "talleres-modif", label: "config talleres" },
+              { id: "Eventos-modif", label: "config Eventos" },
               { id: "proyectos", label: "Proyectos Relevantes" },
               { id: "reservas", label: "Reservas" },
               { id: "listar-usuarios", label: "Ver Usuarios" },

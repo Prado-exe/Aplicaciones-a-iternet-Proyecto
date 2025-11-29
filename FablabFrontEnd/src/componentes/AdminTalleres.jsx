@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-export default function AdminCarrusel() {
-  const [eventos, setEventos] = useState([]);
+export default function AdminTalleres() {
+  const [talleres, setTalleres] = useState([]);
   const [config, setConfig] = useState(null);
   const [seleccionados, setSeleccionados] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -10,22 +10,22 @@ export default function AdminCarrusel() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [evRes, cfgRes] = await Promise.all([
-          fetch("http://localhost:5000/api/eventos"),
-          fetch("http://localhost:5000/api/carrusel/config")
+        const [tRes, cfgRes] = await Promise.all([
+          fetch("http://localhost:5000/api/Eventos"),       // lista completa de eventos
+          fetch("http://localhost:5000/api/talleres/config") // configuración guardada
         ]);
 
-        if (!evRes.ok) throw new Error(`Error eventos: ${evRes.status}`);
+        if (!tRes.ok) throw new Error(`Error talleres: ${tRes.status}`);
         if (!cfgRes.ok) throw new Error(`Error config: ${cfgRes.status}`);
 
-        const ev = await evRes.json();
+        const t = await tRes.json();
         const cfg = await cfgRes.json();
 
-        setEventos(Array.isArray(ev) ? ev : []);
+        setTalleres(Array.isArray(t) ? t : []);
         setConfig(cfg.config || { cantidadMostrar: 0 });
-        setSeleccionados(cfg.config?.eventos_mostrados || []);
+        setSeleccionados(cfg.config?.talleres_mostrados || []);
       } catch (err) {
-        console.error("Error cargando eventos o configuración:", err);
+        console.error("Error cargando talleres o configuración:", err);
         setError(err.message);
       } finally {
         setCargando(false);
@@ -45,11 +45,11 @@ export default function AdminCarrusel() {
 
   const guardar = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/carrusel/config", {
+      const res = await fetch("http://localhost:5000/api/talleres/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          eventos_mostrados: seleccionados,
+          talleres_mostrados: seleccionados,
           cantidadMostrar: seleccionados.length
         })
       });
@@ -67,15 +67,15 @@ export default function AdminCarrusel() {
 
   return (
     <div>
-      <h2>Configurar Carrusel</h2>
-      {Array.isArray(eventos) && eventos.map(e => (
-        <div key={e._id}>
+      <h2>Configurar Talleres</h2>
+      {Array.isArray(talleres) && talleres.map(t => (
+        <div key={t._id}>
           <input
             type="checkbox"
-            checked={seleccionados.includes(e._id)}
-            onChange={() => toggleSeleccion(e._id)}
+            checked={seleccionados.includes(t._id)}
+            onChange={() => toggleSeleccion(t._id)}
           />
-          {e.NombreEvento}
+          {t.NombreEvento} {/* usamos NombreEvento porque el modelo es Evento */}
         </div>
       ))}
       <button onClick={guardar}>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export default function AdminCarrusel() {
+export default function AdminEventos() {
   const [eventos, setEventos] = useState([]);
   const [config, setConfig] = useState(null);
   const [seleccionados, setSeleccionados] = useState([]);
@@ -10,18 +10,18 @@ export default function AdminCarrusel() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [evRes, cfgRes] = await Promise.all([
-          fetch("http://localhost:5000/api/eventos"),
-          fetch("http://localhost:5000/api/carrusel/config")
+        const [eRes, cfgRes] = await Promise.all([
+          fetch("http://localhost:5000/api/eventos"),       // lista completa de eventos
+          fetch("http://localhost:5000/api/eventos/config") // configuración guardada
         ]);
 
-        if (!evRes.ok) throw new Error(`Error eventos: ${evRes.status}`);
+        if (!eRes.ok) throw new Error(`Error eventos: ${eRes.status}`);
         if (!cfgRes.ok) throw new Error(`Error config: ${cfgRes.status}`);
 
-        const ev = await evRes.json();
+        const e = await eRes.json();
         const cfg = await cfgRes.json();
 
-        setEventos(Array.isArray(ev) ? ev : []);
+        setEventos(Array.isArray(e) ? e : []);
         setConfig(cfg.config || { cantidadMostrar: 0 });
         setSeleccionados(cfg.config?.eventos_mostrados || []);
       } catch (err) {
@@ -45,7 +45,7 @@ export default function AdminCarrusel() {
 
   const guardar = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/carrusel/config", {
+      const res = await fetch("http://localhost:5000/api/eventos/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -67,7 +67,7 @@ export default function AdminCarrusel() {
 
   return (
     <div>
-      <h2>Configurar Carrusel</h2>
+      <h2>Configurar Eventos</h2>
       {Array.isArray(eventos) && eventos.map(e => (
         <div key={e._id}>
           <input
@@ -75,7 +75,7 @@ export default function AdminCarrusel() {
             checked={seleccionados.includes(e._id)}
             onChange={() => toggleSeleccion(e._id)}
           />
-          {e.NombreEvento}
+          {e.NombreEvento} {/* asumimos que el modelo Evento tiene NombreEvento */}
         </div>
       ))}
       <button onClick={guardar}>
