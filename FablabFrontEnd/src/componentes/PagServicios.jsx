@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
+import Footer from "./Footbar"; 
 import UniqueDivider from "./UniqueDivider";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -116,6 +117,8 @@ export default function PagServicios() {
           </p>
         </div>
       </main>
+      {/* Footer */}
+      <Footer />
     </>
   );
 }
@@ -390,7 +393,7 @@ function ServiceRequestForm({
           )}
         </div>
       </div>
-
+      
       {/* Botones */}
       <div className="flex flex-wrap gap-3 justify-end pt-2">
         <button
@@ -407,6 +410,7 @@ function ServiceRequestForm({
           Enviar solicitud
         </button>
       </div>
+      
     </motion.form>
   );
 }

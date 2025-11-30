@@ -1,12 +1,12 @@
-const ConfiguracionTalleres = require("../models/configuracionTalleres");
+const ConfiguracionGeneral = require("../models/ConfiguracionGeneral");
 const Evento = require("../models/Evento"); // usamos Evento como modelo
 
 // Obtener configuración + eventos asociados (talleres)
 exports.getTalleresData = async (req, res) => {
   try {
-    const config = await ConfiguracionTalleres.findById("config_talleres");
+    const configGeneral = await ConfiguracionGeneral.findById("config_general");
 
-    if (!config) {
+    if (!configGeneral) {
       return res.json({
         talleres: [],
         config: { cantidadMostrar: 0 }
@@ -14,27 +14,32 @@ exports.getTalleresData = async (req, res) => {
     }
 
     const talleres = await Evento.find({
-      _id: { $in: config.talleres_mostrados }
+      _id: { $in: configGeneral.talleres.talleres_mostrados }
     });
 
-    res.json({ talleres, config });
+    res.json({ talleres, config: configGeneral.talleres });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Guardar nueva configuración
+// Guardar nueva configuración de talleres
 exports.updateTalleresConfig = async (req, res) => {
   const { talleres_mostrados, cantidadMostrar } = req.body;
 
   try {
-    const config = await ConfiguracionTalleres.findByIdAndUpdate(
-      "config_talleres",
-      { talleres_mostrados, cantidadMostrar },
+    const configGeneral = await ConfiguracionGeneral.findByIdAndUpdate(
+      "config_general",
+      {
+        $set: {
+          "talleres.talleres_mostrados": talleres_mostrados,
+          "talleres.cantidadMostrar": cantidadMostrar
+        }
+      },
       { upsert: true, new: true } // crea si no existe
     );
 
-    res.json({ message: "Configuración actualizada", config });
+    res.json({ message: "Configuración de talleres actualizada", config: configGeneral.talleres });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

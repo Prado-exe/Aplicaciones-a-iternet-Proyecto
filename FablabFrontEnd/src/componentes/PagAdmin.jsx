@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import CrearEvento from "./CrearEvento.jsx";
 import ListarUsuarios from "./ListarUsuarios.jsx";
 import UsuarioDetalle from "./usuarioDetalle.jsx";
-import AdminCarrusel from "./AdminCarrusel.jsx"; //Importamos
-import AdminTalleres from "./AdminTalleres.jsx"; //Importamos
-import AdminEventos from "./AdminEventos.jsx"; //Importamos
+import ConfiguracionIndex from "./ConfiguracionIndex.jsx";
+
 
 
 export default function PagAdmin() {
@@ -30,14 +29,15 @@ export default function PagAdmin() {
     }
 
     switch (seccionActiva) {
-      case "carrusel": // ✅ Nueva sección
+
+      case "config-general":
+        return <ConfiguracionIndex />;
+      /*case "carrusel": // ✅ Nueva sección
         return <AdminCarrusel />;
       case "talleres-modif":
         return <AdminTalleres />;
       case "Eventos-modif":
-        return <AdminEventos />;
-      case "proyectos":
-        return <p className="opacity-90">Administración de proyectos relevantes o destacados del FabLab.</p>;
+        return <AdminEventos />;*/
       case "reservas":
         return <p className="opacity-90">Panel para gestionar las reservas de máquinas o espacios.</p>;
       case "eventos":
@@ -57,10 +57,10 @@ export default function PagAdmin() {
 
           <ul className="space-y-3">
             {[
-              { id: "carrusel", label: "Configurar Carrusel" }, // ✅ Nuevo botón
+              { id: "config-general", label: "Configuración index" },
+              /*{ id: "carrusel", label: "Configurar Carrusel" }, // ✅ Nuevo botón
               { id: "talleres-modif", label: "config talleres" },
-              { id: "Eventos-modif", label: "config Eventos" },
-              { id: "proyectos", label: "Proyectos Relevantes" },
+              { id: "Eventos-modif", label: "config Eventos" },*/
               { id: "reservas", label: "Reservas" },
               { id: "listar-usuarios", label: "Ver Usuarios" },
               { id: "eventos", label: "Eventos" },
@@ -87,9 +87,10 @@ export default function PagAdmin() {
             {seccionActiva.replace("-", " ")}
           </h2>
 
-          <div className="bg-[#1b1b1f] p-6 rounded-xl border border-yellow-500/10 min-h-[300px]">
+          <div className="min-h-[300px] px-4 py-2">
             {renderContenido()}
           </div>
+
         </div>
 
       </div>

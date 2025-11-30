@@ -1,39 +1,47 @@
-const ConfiguracionCarrusel = require("../models/ConfiguracionCarrusel");
+const ConfiguracionGeneral = require("../models/ConfiguracionGeneral");
 const Evento = require("../models/Evento");
 
+// Obtener datos del carrusel
 exports.getCarruselData = async (req, res) => {
   try {
-    const config = await ConfiguracionCarrusel.findById("config_carrusel");
+    // Buscamos el único documento de configuración general
+    const configGeneral = await ConfiguracionGeneral.findById("config_general");
 
-    if (!config) {
+    if (!configGeneral) {
       return res.json({
         eventos: [],
         config: { cantidadMostrar: 0 }
       });
     }
- 
+
+    // Accedemos a la subestructura de carrusel
     const eventos = await Evento.find({
-      _id: { $in: config.eventos_mostrados }
+      _id: { $in: configGeneral.carrusel.eventos_mostrados }
     });
 
-    res.json({ eventos, config });
+    res.json({ eventos, config: configGeneral.carrusel });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Guardar nueva configuración
+// Guardar nueva configuración del carrusel
 exports.updateCarruselConfig = async (req, res) => {
   const { eventos_mostrados, cantidadMostrar } = req.body;
 
   try {
-    const config = await ConfiguracionCarrusel.findByIdAndUpdate(
-      "config_carrusel",
-      { eventos_mostrados, cantidadMostrar },
+    const configGeneral = await ConfiguracionGeneral.findByIdAndUpdate(
+      "config_general",
+      {
+        $set: {
+          "carrusel.eventos_mostrados": eventos_mostrados,
+          "carrusel.cantidadMostrar": cantidadMostrar
+        }
+      },
       { upsert: true, new: true } // crea si no existe
     );
 
-    res.json({ message: "Configuración actualizada", config });
+    res.json({ message: "Configuración del carrusel actualizada", config: configGeneral.carrusel });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

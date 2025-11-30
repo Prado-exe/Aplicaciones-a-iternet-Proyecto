@@ -1,13 +1,12 @@
-// controllers/eventosController.js
-const ConfiguracionEventos = require("../models/configuracionEventos");
+const ConfiguracionGeneral = require("../models/ConfiguracionGeneral");
 const Evento = require("../models/Evento");
 
 // Obtener configuración de eventos y los eventos destacados
 exports.getEventosData = async (req, res) => {
   try {
-    const config = await ConfiguracionEventos.findById("config_eventos");
+    const configGeneral = await ConfiguracionGeneral.findById("config_general");
 
-    if (!config) {
+    if (!configGeneral) {
       return res.json({
         eventos: [],
         config: { cantidadMostrar: 0 }
@@ -15,10 +14,10 @@ exports.getEventosData = async (req, res) => {
     }
 
     const eventos = await Evento.find({
-      _id: { $in: config.eventos_mostrados }
+      _id: { $in: configGeneral.eventos.eventos_mostrados }
     });
 
-    res.json({ eventos, config });
+    res.json({ eventos, config: configGeneral.eventos });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -29,13 +28,18 @@ exports.updateEventosConfig = async (req, res) => {
   const { eventos_mostrados, cantidadMostrar } = req.body;
 
   try {
-    const config = await ConfiguracionEventos.findByIdAndUpdate(
-      "config_eventos",
-      { eventos_mostrados, cantidadMostrar },
+    const configGeneral = await ConfiguracionGeneral.findByIdAndUpdate(
+      "config_general",
+      {
+        $set: {
+          "eventos.eventos_mostrados": eventos_mostrados,
+          "eventos.cantidadMostrar": cantidadMostrar
+        }
+      },
       { upsert: true, new: true } // crea si no existe
     );
 
-    res.json({ message: "Configuración de eventos actualizada", config });
+    res.json({ message: "Configuración de eventos actualizada", config: configGeneral.eventos });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

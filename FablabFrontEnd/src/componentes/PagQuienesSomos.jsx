@@ -1,5 +1,6 @@
 import React from "react";
 import Navbar from "./Navbar";
+import Footer from "./Footbar"; 
 import misionImg from "../assets/ImagenMision.png";
 import visionImg from "../assets/ImagenVision.png";
 import staff1 from "../assets/StaffRicardo.png";
@@ -97,6 +98,8 @@ const PagQuienesSomos = () => {
           </div>
         </div>
       </div>
+      {/* Footer */}
+      <Footer />
     </>
   );
 };

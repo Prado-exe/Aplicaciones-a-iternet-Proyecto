@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import "../styles/TalleresSection.css"; // puedes mantener el mismo estilo
+import "../styles/EventosSection.css"; // puedes mantener el mismo estilo
 
 export default function EventosSection() {
   const [eventos, setEventos] = useState([]);

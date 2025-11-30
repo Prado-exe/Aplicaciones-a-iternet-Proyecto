@@ -15,12 +15,19 @@ const CuposSchema = new mongoose.Schema({
   CantidadCupos: {
     type: Number,
     required: true,
+    min: 1
   },
   IDR_Inscritos: {
-    type: [Number], // ids de usuarios inscritos (o RUTs)
-    default: [],
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Usuario",
+    default: []
+  },
+  CuposDisponibles: {
+    type: Number,
+    default: 0
   }
 });
+
 
 const EventoSchema = new mongoose.Schema({
   NombreEvento: {
@@ -54,6 +61,15 @@ const EventoSchema = new mongoose.Schema({
     type: [ActividadSchema],
     default: []
   }
+});
+
+EventoSchema.pre("save", function (next) {
+  const inscritos = this.CuposEventos.IDR_Inscritos.length;
+  const total = this.CuposEventos.CantidadCupos;
+
+  this.CuposEventos.CuposDisponibles = Math.max(total - inscritos, 0);
+
+  next();
 });
 
 module.exports = mongoose.model("Evento", EventoSchema);
