@@ -5,6 +5,9 @@ import UniqueDivider from "./UniqueDivider";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import imgAR from "../assets/medium-shot-man-wearing-vr-glasses.png";
+import { useAuth } from "../context/AuthContext";
+import {crearSolicitudConProyectoExistente,crearSolicitudYProyectoNuevo} from "../api/solicitudService";
+import { getMyProjects} from "../api/proyectService";
 
 const LOCAL_KEY = "portfolioEntriesFabLab";
 
@@ -51,37 +54,36 @@ export default function PagServicios() {
     },
   ];
 
-  // Proyectos del usuario leídos desde localStorage (modo demo)
-  const [projects, setProjects] = useState([]);
-  // Usuario logueado (modo demo, mismo que en PagMisProyectos)
-  const [user, setUser] = useState(null);
+  //token Para la autenticacion
+  const {token} = useAuth();
 
+  // Proyectos del usuario obtenidos desde el backend
+  const [projects, setProjects] = useState([]);
+
+  //Cargamos los proyectos del usuario llamando al backend y se asignan a proyects
   useEffect(() => {
-    const savedEntries = localStorage.getItem(LOCAL_KEY);
-    if (savedEntries) {
+    if (!token) return;
+
+    const fetchProjects = async () => {
       try {
-        const parsed = JSON.parse(savedEntries);
-        const mapped = parsed.map((e) => ({
-          id: e.id,
-          titulo: e.titulo || "Proyecto sin título",
+        const proyectos = await getMyProjects(token);
+
+        const mapped = proyectos.map((p) => ({
+          id: p._id,
+          titulo: p.NombreProyecto || "Proyecto sin título",
+          imagenCount: Array.isArray(p.imagenes) ? p.imagenes.length : 0,
+          archivoCount: Array.isArray(p.archivos) ? p.archivos.length : 0,
         }));
+
         setProjects(mapped);
       } catch (error) {
-        console.error("Error leyendo proyectos desde localStorage", error);
+        console.error("Error cargando proyectos para solicitudes:", error);
       }
-    }
-  }, []);
+    };
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error("Error leyendo usuario desde localStorage", error);
-      }
-    }
-  }, []);
+    fetchProjects();
+  }, [token]);
+
 
   return (
     <>
@@ -106,7 +108,6 @@ export default function PagServicios() {
               bloque={b}
               index={i}
               projects={projects}
-              user={user}
             />
           ))}
 
@@ -127,9 +128,14 @@ export default function PagServicios() {
    Card de servicio con modo info / solicitud
    ====================================== */
 
-function ServiceCard({ bloque, index, projects, user }) {
-  const [mode, setMode] = useState("info"); // "info" | "request"
+function ServiceCard({ bloque, index, projects}) {
+  const [mode, setMode] = useState("info"); // "info" | "request(abre el formulario para solicitar un servicio)"
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);  //Loading cuando creen solicitudes 
   const navigate = useNavigate();
+  const { isAuthenticated, token } = useAuth();
+
+  console.log("Projects en ServiceCard:", projects);
 
   // Layout alternado:
   // - En modo "info" usamos el patrón que ya tenías (alterna por índice).
@@ -146,14 +152,101 @@ function ServiceCard({ bloque, index, projects, user }) {
         ? "md:flex-row"
         : "md:flex-row-reverse";
 
-  const handleSubmitRequest = (payload) => {
-    console.log("[FRONT] Solicitud de servicio:", payload);
-    setMode("info");
+  
+  const handleSubmitRequest = async (formValues) => {
+    //Corroboramos que este autenticado
+    if (!isAuthenticated) {
+      navigate("/auth");
+      return;
+    }
+
+    try {
+      setErrorMsg("");
+      setLoading(true);
+
+      //Asigna a esta variable el servicio en el que estaba el usuario(impresora3d,laser,etc)
+      const tipoSolicitud = mapServiceToTipoSolicitud(bloque.id);
+
+      //Lee lo del formulario
+      const {
+        mode: modoAsociacion,
+        descripcion,
+        imagenFiles,
+        archivoFiles,
+        proyectoSeleccionado,
+        nuevoProyectoTitulo,
+        nuevoProyectoDesc,
+      } = formValues;
+
+      //Identificar que tipo de proyecto eligio el usuario(Si existe o tiene que crear uno)
+      if (modoAsociacion === "existing") {
+        if (!proyectoSeleccionado) {
+          throw new Error("Debes seleccionar un proyecto existente.");
+        }
+        
+        //Llama al backend con los inputs elegidos por el usuario
+        await crearSolicitudConProyectoExistente(token, {
+          IDR_Proyecto: proyectoSeleccionado,
+          TipoSolicitud: tipoSolicitud,
+          DescripcionSolicitud: descripcion,
+          imagenFiles,
+          archivoFiles,
+        });
+      } else if (modoAsociacion === "new") { //Si eligio nuevo proyecto
+        if (!nuevoProyectoTitulo) {
+          throw new Error("Debes ingresar el título del nuevo proyecto.");
+        }
+        
+        //Llama al backend con los inputs elegidos por el usuario
+        await crearSolicitudYProyectoNuevo(token, {
+          NombreProyecto: nuevoProyectoTitulo,
+          DescripcionProyecto: nuevoProyectoDesc || "",
+          TipoSolicitud: tipoSolicitud,
+          DescripcionSolicitud: descripcion,
+          imagenFiles,
+          archivoFiles,
+        });
+      } else {
+        throw new Error(
+          "Debes elegir si quieres asociar a un proyecto existente o crear uno nuevo."
+        );
+      }
+
+      alert("Solicitud enviada correctamente ✨");
+      setMode("info");
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message || "Error al enviar la solicitud");
+    } finally {
+    setLoading(false);//Loading siempre
+  }
+  };
+
+  //Mapeo para identificar en que servicio(de la vista) esta el usuario
+  const mapServiceToTipoSolicitud = (serviceId) => {
+    switch (serviceId) {
+      case "laser":
+        return "Corte y grabado Laser";
+
+      case "impresion3d":
+        return "Impresora 3D";
+
+      case "electronica":
+        return "Electrónica y Robótica";
+
+      case "vr":
+        return "Realidad Virtual";
+
+      case "ar":
+        return "Realidad Aumentada";
+
+      default:
+        return "Realidad Virtual"; 
+    }
   };
 
   const handleOpenForm = () => {
-    if (!user) {
-      // ⚠️ Cambia "/auth" si tu ruta de login es otra
+    if (!isAuthenticated) {
       navigate("/auth");
       return;
     }
@@ -192,14 +285,15 @@ function ServiceCard({ bloque, index, projects, user }) {
               </button>
             </motion.div>
           ) : (
-            <ServiceRequestForm
-              key="form"
-              serviceId={bloque.id}
-              serviceName={bloque.titulo}
-              projects={projects}
-              onCancel={() => setMode("info")}
-              onSubmit={handleSubmitRequest}
-            />
+              <ServiceRequestForm
+                key="form"
+                serviceName={bloque.titulo}
+                projects={projects}
+                onCancel={() => setMode("info")}
+                onSubmit={handleSubmitRequest}
+                errorMsg={errorMsg}
+                loading={loading} 
+              />
           )}
         </AnimatePresence>
       </div>
@@ -217,27 +311,94 @@ function ServiceCard({ bloque, index, projects, user }) {
   );
 }
 
-/* ============================
-   Formulario de solicitud
-   ============================ */
+  /* ============================
+    Formulario de solicitud
+    ============================ */
 
-function ServiceRequestForm({
-  serviceId,
-  serviceName,
-  projects,
-  onCancel,
-  onSubmit,
-}) {
-  const [descripcion, setDescripcion] = useState("");
-  const [file, setFile] = useState(null);
+  function ServiceRequestForm({
+    serviceName,
+    projects,
+    onCancel,
+    onSubmit,
+    errorMsg,
+    loading,
+  }) {
 
-  // "" = nada seleccionado, "existing" | "new"
-  const [modoAsociacion, setModoAsociacion] = useState("");
-  const [proyectoSeleccionado, setProyectoSeleccionado] = useState("");
-  const [nuevoProyectoTitulo, setNuevoProyectoTitulo] = useState("");
-  const [nuevoProyectoDesc, setNuevoProyectoDesc] = useState("");
+    const MAX_IMAGES = 3;
+    const MAX_FILES = 2;
 
-  const handleSubmit = (e) => {
+    //Preview de imagenes
+    const [imagePreviews, setImagePreviews] = useState([]);
+
+    const [descripcion, setDescripcion] = useState("");
+
+    const [imageFiles, setImageFiles] = useState([]);
+    const [fileFiles, setFileFiles] = useState([]);
+
+    // "" = nada seleccionado, "existing" | "new"
+    const [modoAsociacion, setModoAsociacion] = useState("");
+    const [proyectoSeleccionado, setProyectoSeleccionado] = useState("");
+    const [nuevoProyectoTitulo, setNuevoProyectoTitulo] = useState("");
+    const [nuevoProyectoDesc, setNuevoProyectoDesc] = useState("");
+
+    const selectedProject =
+      modoAsociacion === "existing"
+        ? projects.find((p) => p.id === proyectoSeleccionado)
+        : null;
+
+    //Cuenta las imagenes y archivos ya guardados en un proyecto(Para controlar no que exceda en solicitudes el limite de Archivos/Imgs)
+    const currentImgCount = selectedProject?.imagenCount || 0;
+    const currentFileCount = selectedProject?.archivoCount || 0;
+
+    //Cuenta las imagenes y archivos que puede guardar el usario considerando la capacidad max
+    const availableImgSlots = Math.max(
+      0,
+      MAX_IMAGES - currentImgCount - imageFiles.length
+    );
+
+    const availableFileSlots = Math.max(
+      0,
+      MAX_FILES - currentFileCount - fileFiles.length
+    );
+  const handleFileChange = (e) => {
+
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const imageCandidates = [];
+    const fileCandidates = [];
+
+    //Separamos imagenes de archivos
+    files.forEach((file) => {
+      if (file.type && file.type.startsWith("image/")) {
+        imageCandidates.push(file);
+      } else {
+        fileCandidates.push(file);
+      }
+    });
+
+    // IMAGENES 
+    if (availableImgSlots > 0 && imageCandidates.length > 0) {
+      const toAdd = imageCandidates.slice(0, availableImgSlots);
+
+      setImageFiles((prev) => [...prev, ...toAdd]);//Imagenes que se agregaran al backend
+
+      const newPreviews = toAdd.map((file) => ({ //Setear imagenes preliminares de las seleccionada para mostrarlas en la UI
+        url: URL.createObjectURL(file),
+        name: file.name,
+        type: file.type,
+      }));
+      setImagePreviews((prev) => [...prev, ...newPreviews]);
+    }
+
+    //ARCHIVOS
+    if (availableFileSlots > 0 && fileCandidates.length > 0) {
+      const toAdd = fileCandidates.slice(0, availableFileSlots);
+      setFileFiles((prev) => [...prev, ...toAdd]); //Archivos que se agregaran al backend
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!modoAsociacion) {
@@ -248,34 +409,28 @@ function ServiceRequestForm({
     }
 
     const payload = {
-      type: "serviceRequest",
-      serviceKey: serviceId,
-      serviceName,
-      description: descripcion,
-      // fileReference se puede agregar cuando exista manejo de archivos
-      projectAssociation: {
-        mode: modoAsociacion, // "existing" | "new"
-        projectId:
-          modoAsociacion === "existing" ? proyectoSeleccionado : undefined,
-        newProject:
-          modoAsociacion === "new"
-            ? {
-                title: nuevoProyectoTitulo,
-                description: nuevoProyectoDesc || undefined,
-              }
-            : undefined,
-      },
+      mode: modoAsociacion,          
+      descripcion,
+      imagenFiles: imageFiles,
+      archivoFiles: fileFiles,
+      proyectoSeleccionado,
+      nuevoProyectoTitulo,
+      nuevoProyectoDesc,
     };
 
-    onSubmit(payload);
+    await onSubmit(payload);
 
+    // limpiar 
     setDescripcion("");
-    setFile(null);
+    setImageFiles([]);
+    setImagePreviews([]);
+    setFileFiles([]);
     setModoAsociacion("");
     setProyectoSeleccionado("");
     setNuevoProyectoTitulo("");
     setNuevoProyectoDesc("");
   };
+
 
   return (
     <motion.form
@@ -311,18 +466,63 @@ function ServiceRequestForm({
       {/* Archivo / imagen */}
       <div>
         <label className="block text-gray-300 mb-1">
-          Archivo o imagen de referencia (opcional)
+          Archivos / Imágenes de referencia (opcional)
         </label>
         <input
           type="file"
+          multiple
           className="w-full text-gray-300 text-xs md:text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-yellow-500/90 file:text-black hover:file:bg-yellow-400 cursor-pointer"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          onChange={handleFileChange}
         />
-        {file && (
-          <p className="mt-1 text-xs text-gray-400">
-            Archivo seleccionado:{" "}
-            <span className="text-yellow-300">{file.name}</span>
-          </p>
+
+        {/* Info de cupo cuando es proyecto EXISTENTE */}
+        {modoAsociacion === "existing" && selectedProject && (
+        <p className="mt-1 text-[11px] text-gray-400">
+          Este proyecto ya tiene{" "}
+          <span className="text-yellow-300">{currentImgCount}</span> imágenes y{" "}
+          <span className="text-yellow-300">{currentFileCount}</span> archivos.
+          Puedes agregar hasta{" "}
+          <span className="text-yellow-300">{availableImgSlots}</span> imágenes y{" "}
+          <span className="text-yellow-300">{availableFileSlots}</span> archivos más.
+        </p>
+        )}
+
+        {/* PREVIEW SOLO DE IMAGENES */}
+        {Array.isArray(imagePreviews) && imagePreviews.length > 0 && (
+          <div className="mt-3">
+            <p className="text-xs text-gray-400 mb-1">Imágenes seleccionadas</p>
+            <div className="grid grid-cols-3 gap-3">
+              {imagePreviews.map((preview, idx) => (
+                <div
+                  key={idx}
+                  className="w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden border border-yellow-500/40 bg-[#1e1e24]"
+                >
+                  <img
+                    src={preview.url}
+                    alt={preview.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/*ARCHIVOS*/}
+        {fileFiles.length > 0 && (
+          <div className="mt-3">
+            <p className="text-xs text-gray-400 mb-1">Archivos adjuntos</p>
+            <ul className="text-xs text-gray-300 list-disc list-inside space-y-1">
+              {fileFiles.map((file, idx) => (
+                <li key={idx}>
+                  {file.name}{" "}
+                  <span className="text-[10px] text-gray-500">
+                    ({file.type || "tipo desconocido"})
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
 
@@ -394,6 +594,12 @@ function ServiceRequestForm({
         </div>
       </div>
       
+
+      {/* Errores */}    
+      {errorMsg && (
+        <p className="text-red-400 text-xs md:text-sm mt-2">{errorMsg}</p>
+      )}
+
       {/* Botones */}
       <div className="flex flex-wrap gap-3 justify-end pt-2">
         <button
@@ -406,8 +612,9 @@ function ServiceRequestForm({
         <button
           type="submit"
           className="px-4 py-2 rounded-xl bg-yellow-500 text-black font-semibold shadow-[0_0_15px_rgba(250,204,21,0.8)] hover:bg-yellow-400 transition-colors text-sm md:text-base"
+          disabled={loading}  
         >
-          Enviar solicitud
+        {loading ? "Enviando..." : "Enviar solicitud"}        
         </button>
       </div>
       

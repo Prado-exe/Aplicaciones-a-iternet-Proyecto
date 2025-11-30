@@ -104,23 +104,11 @@ exports.login = async ({ CorreoUsuario, ContraUsuario }) => {
 
 //Obetener perfil usuario //
 exports.getProfile = async (userId) => {
-  const [user, ultimoProyecto, reservaReciente, totalProyectos, totalReservas] = await Promise.all([
-    Usuario.findById(userId)
-      .select('-ContraUsuario -__v')
-      .lean(),
-    Proyecto
-      .findOne({ IDR_Usuario: userId })        
-      .sort({ FechaCreacion: -1 })         
-      .select('NombreProyecto FechaCreacion')  
-      .lean(),
-    Solicitudes
-      .findOne({ IDR_Usuario: userId })        
-      .sort({ FechaReserva: -1 })          
-      .select('TipoSolicitud FechaReserva') 
-      .lean(),
-    Proyecto.countDocuments({ IDR_Usuario: userId }),     
-    Solicitudes.countDocuments({ IDR_Usuario: userId }),   
-  ]);
+  const user = await Usuario.findById(userId)
+    .select('-ContraUsuario -__v')
+    .populate('Proyectos', 'NombreProyecto FechaCreacion')
+    .populate('Solicitudes', 'TipoSolicitud FechaReserva')
+    .lean();
 
   if (!user) {
     const e = new Error('Usuario no encontrado');
@@ -128,12 +116,23 @@ exports.getProfile = async (userId) => {
     throw e;
   }
 
+  const totalProyectos = user.Proyectos?.length || 0;
+  const totalSolicitudes = user.Solicitudes?.length || 0;
+
+  const ultimoProyecto = totalProyectos > 0
+    ? user.Proyectos[user.Proyectos.length - 1]
+    : null;
+
+  const reservaReciente = totalSolicitudes > 0
+    ? user.Solicitudes[user.Solicitudes.length - 1]
+    : null;
+
   return {
     ...user,
     UltimoProyecto: ultimoProyecto ? ultimoProyecto.NombreProyecto : null,
     ReservaMasReciente: reservaReciente ? reservaReciente.TipoSolicitud : null,
     TotalProyectos: totalProyectos,
-    TotalReservas: totalReservas,
+    TotalReservas: totalSolicitudes,
   };
 };
 

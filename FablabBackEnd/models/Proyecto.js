@@ -8,6 +8,13 @@ const proyectoSchema = new mongoose.Schema({
     required: [true, 'El autor del proyecto es requerido'],
   },
 
+  IDR_Solicitudes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Solicitud', 
+    },
+  ],
+  
   NombreProyecto: {
     type: String,
     required: [true, 'El nombre del proyecto es requerido'],
@@ -40,11 +47,11 @@ const proyectoSchema = new mongoose.Schema({
   },
   ],
 
-
   FechaCreacion: {
     type: Date,
     default: Date.now,
   },
+
 
 });
 
