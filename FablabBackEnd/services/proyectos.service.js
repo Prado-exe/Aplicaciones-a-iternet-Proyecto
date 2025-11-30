@@ -51,6 +51,10 @@ exports.createProject = async (userId, body, files = {}) => {
 exports.getMyProjects = async (userId) => {
   return await Proyecto.find({ IDR_Usuario: userId })
     .sort({ FechaCreacion: -1 })
+    .populate({ //Listado de solicitudes asociadas al proyecto
+      path: "IDR_Solicitudes",
+      select: "TipoSolicitud FechaReserva", 
+    })
     .lean();
 };
 

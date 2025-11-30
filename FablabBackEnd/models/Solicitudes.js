@@ -1,36 +1,32 @@
-//Este modelo es unicamente para validar las reservas de los servicios
 const mongoose = require('mongoose');
 
 const solicitudSchema = new mongoose.Schema({
-  // Usuario que hace la solicitud / reserva
-  IDR_Usuario: {
+  // Referencia al proyecto
+  IDR_Proyecto: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Usuario',
-    required: [true, 'El usuario de la solicitud es requerido'],
+    ref: 'Proyecto',
+    required: [true, 'El proyecto asociado es requerido'],
   },
 
   TipoSolicitud: {
     type: String,
     required: [true, 'El tipo de solicitud es requerido'],
     trim: true,
-    enum: {
-      values: ['Impresora 3D', 'Corte Laser', 'Realidad Virtual'],
-    },
+    enum: ['Corte y grabado Laser', 'Impresora 3D', 'Electrónica y Robótica','Realidad Virtual','Realidad Aumentada'],
   },
 
   DescripcionSolicitud: {
     type: String,
     trim: true,
-    maxlength: [500, 'La descripción no debe superar los 500 caracteres'],
+    maxlength: [500, 'La descripcion no debe superar los 500 caracteres'],
   },
 
-  // true = aceptada, false = pendiente
   EstadoSolicitud: {
     type: Boolean,
     default: false,
   },
 
-  FechaReserva: { //Esta fecha representa la creacion del documento (de momento)
+  FechaReserva: {
     type: Date,
     default: Date.now,
   },

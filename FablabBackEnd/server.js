@@ -61,6 +61,9 @@ app.use('/api/users', userRoutes);
 const proyectoRoutes = require('./routes/proyectos');
 app.use('/api/proyectos', proyectoRoutes);
 
+//Ruta de solicitudes
+const solicitudRoutes = require('./routes/solicitudes');
+app.use('/api/solicitudes', solicitudRoutes);
 
 // Manejo de errores 404
 app.use((req, res) => {

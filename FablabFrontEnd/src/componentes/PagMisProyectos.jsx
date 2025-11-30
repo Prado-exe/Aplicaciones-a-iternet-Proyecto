@@ -66,6 +66,15 @@ const PagMisProyectos = () => {
                 minute: "2-digit",
               })
             : "",
+          solicitudes: Array.isArray(p.IDR_Solicitudes)
+            ? p.IDR_Solicitudes.map((s) => ({
+                id: s._id,
+                tipo: s.TipoSolicitud,
+                fecha: s.FechaReserva
+                  ? new Date(s.FechaReserva).toLocaleDateString()
+                  : null,
+              }))
+            : [],
         }));
         //Guardamos en setEntries cada documento de la coleccion proyectos 
         setEntries(mapped);
@@ -418,6 +427,31 @@ const handleSubmit = async (e) => {
                           "Sin descripción registrada para esta actividad."}
                       </p>
                     </div>
+                    
+                    {/* Listado de solicitudes asociadas */}
+                    {Array.isArray(selectedEntry.solicitudes) &&
+                      selectedEntry.solicitudes.length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                            Solicitudes asociadas a este proyecto
+                          </p>
+                          <ul className="text-sm text-gray-200 space-y-1">
+                            {selectedEntry.solicitudes.map((sol) => (
+                              <li key={sol.id} className="flex items-center gap-2">
+                                <span className="inline-flex items-center justify-center w-2 h-2 rounded-full bg-yellow-400" />
+                                <span className="font-medium text-yellow-300">
+                                  {sol.tipo}
+                                </span>
+                                {sol.fecha && (
+                                  <span className="text-[11px] text-gray-400 ml-2">
+                                    · {sol.fecha}
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
                     {/* Aqui se muestran las imagenes rescatadas directamente de cloudinary */}
                     {selectedEntry.imagenes && selectedEntry.imagenes.length > 0 && (
