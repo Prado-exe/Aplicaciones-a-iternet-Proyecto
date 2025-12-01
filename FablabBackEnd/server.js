@@ -10,14 +10,29 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 // Middleware
-const allowedOrigins = process.env.CORS_ORIGINS
-  ? process.env.CORS_ORIGINS.split(",").map(o => o.trim())
-  : ["http://localhost:5173"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:5173/"
+];
 
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // permite curl, Postman
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } 
+    console.error("CORS blocked:", origin);
+    return callback(new Error("CORS origin no permitido"));
+  },
+  credentials: true
 }));
+
+app.use((req, res, next) => {
+  console.log("Incoming origin:", req.headers.origin);
+  next();
+});
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
