@@ -135,7 +135,7 @@ function ServiceCard({ bloque, index, projects}) {
   const navigate = useNavigate();
   const { isAuthenticated, token } = useAuth();
 
-  console.log("Projects en ServiceCard:", projects);
+  //onsole.log("Projects en ServiceCard:", projects);
 
   // Layout alternado:
   // - En modo "info" usamos el patrón que ya tenías (alterna por índice).

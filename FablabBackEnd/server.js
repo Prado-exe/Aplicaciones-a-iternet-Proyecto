@@ -61,9 +61,18 @@ app.use('/api/users', userRoutes);
 const proyectoRoutes = require('./routes/proyectos');
 app.use('/api/proyectos', proyectoRoutes);
 
-//Ruta de solicitudes
+// Para las solicitudes generales
 const solicitudRoutes = require('./routes/solicitudes');
 app.use('/api/solicitudes', solicitudRoutes);
+
+// Para las configuraciones/funciones específicas
+const solicitudesAdminRoutes = require("./routes/solicitudesRoutes");
+app.use("/api/solicitudes/admin", solicitudesAdminRoutes);
+
+const adminParticipantesRoutes = require("./routes/adminParticipantesRoutes");
+app.use("/api/admin/participantes", adminParticipantesRoutes);
+
+
 
 // Manejo de errores 404
 app.use((req, res) => {

@@ -4,22 +4,16 @@ import UniqueDivider from "./UniqueDivider";
 import { useAuth } from "../context/AuthContext";
 import { getMyProjects, createProject,/*deleteProject*/downloadProjectFile} from "../api/proyectService";
 
-
 const LOCAL_KEY = "portfolioEntriesFabLab";
-
 const PagMisProyectos = () => {
   //Estado para visualizar imagen mas grande de Detalle proyectos
   const [zoomImage, setZoomImage] = useState(null);
-
   //Autenticacion de usuario
   const { user, token, isAuthenticated } = useAuth();
-  
   // Historial de registros en el FabLab (modo demo)
   const [entries, setEntries] = useState([]);
-
   // Proyecto seleccionado en el workspace
   const [selectedId, setSelectedId] = useState(null);
-
   // Formulario de nuevo registro
   const [formData, setFormData] = useState({
     titulo: "", 
@@ -29,7 +23,7 @@ const PagMisProyectos = () => {
   // Manejo simple de imágenes 
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
-  
+
   //Para limitar candtidad de Archivos/Imagenes
   const MAX_IMAGES = 3;
   const MAX_FILES = 2;
@@ -248,27 +242,6 @@ const handleSubmit = async (e) => {
     setSelectedId(id);
   };
 
-  const handleDeleteEntry = async (id) => {
-    /*
-    try {
-      //Eliminar en BD
-      await deleteProject(token, id);
-
-      //Actualiza arreglo local
-      const filtered = entries.filter((e) => e.id !== id);
-      setEntries(filtered);
-
-      if (filtered.length === 0) {
-        setSelectedId(null);
-      } else if (id === selectedId) {
-        setSelectedId(filtered[0].id);
-      }
-    } catch (err) {
-      console.error("Error eliminando proyecto:", err);
-      alert("No se pudo eliminar el proyecto.");
-    }
-      */
-  };
 
 
   if (!isAuthenticated) {
@@ -507,16 +480,7 @@ const handleSubmit = async (e) => {
                     )}
 
 
-                    {/* Acciones sobre el registro */}
-                    <div className="pt-2 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteEntry(selectedEntry.id)}
-                        className="text-xs px-4 py-2 rounded-full border border-red-500/70 text-red-300 hover:bg-red-500/10 transition"
-                      >
-                        Eliminar registro (demo)
-                      </button>
-                    </div>
+                   
                   </motion.div>
                 ) : (
                   <motion.p

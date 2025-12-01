@@ -3,7 +3,8 @@ import CrearEvento from "./CrearEvento.jsx";
 import ListarUsuarios from "./ListarUsuarios.jsx";
 import UsuarioDetalle from "./usuarioDetalle.jsx";
 import ConfiguracionIndex from "./ConfiguracionIndex.jsx";
-
+import AdminSolicitudes from "./AdminSolicitudes.jsx";
+import AdminParticipantes from "./AdminParticipantes.jsx";
 
 
 export default function PagAdmin() {
@@ -32,12 +33,10 @@ export default function PagAdmin() {
 
       case "config-general":
         return <ConfiguracionIndex />;
-      /*case "carrusel": // ✅ Nueva sección
-        return <AdminCarrusel />;
-      case "talleres-modif":
-        return <AdminTalleres />;
-      case "Eventos-modif":
-        return <AdminEventos />;*/
+      case "participantes-eventos":
+        return <AdminParticipantes />;
+      case "solicitudes":
+        return <AdminSolicitudes />;
       case "reservas":
         return <p className="opacity-90">Panel para gestionar las reservas de máquinas o espacios.</p>;
       case "eventos":
@@ -58,10 +57,8 @@ export default function PagAdmin() {
           <ul className="space-y-3">
             {[
               { id: "config-general", label: "Configuración index" },
-              /*{ id: "carrusel", label: "Configurar Carrusel" }, // ✅ Nuevo botón
-              { id: "talleres-modif", label: "config talleres" },
-              { id: "Eventos-modif", label: "config Eventos" },*/
-              { id: "reservas", label: "Reservas" },
+              { id: "participantes-eventos", label: "Participantes de Eventos" },
+              { id: "solicitudes", label: "Solicitudes" },
               { id: "listar-usuarios", label: "Ver Usuarios" },
               { id: "eventos", label: "Eventos" },
             ].map((item) => (
