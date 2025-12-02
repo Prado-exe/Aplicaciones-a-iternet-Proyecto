@@ -17,9 +17,6 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-<<<<<<< HEAD
-  origin: process.env.FRONTEND_URL,
-=======
   origin: function(origin, callback) {
     if (!origin) return callback(null, true); // permite curl, Postman
     if (allowedOrigins.includes(origin)) {
@@ -28,7 +25,6 @@ app.use(cors({
     console.error("CORS blocked:", origin);
     return callback(new Error("CORS origin no permitido"));
   },
->>>>>>> Actualizacion-ultra-experimental-panel-admin
   credentials: true
 }));
 
