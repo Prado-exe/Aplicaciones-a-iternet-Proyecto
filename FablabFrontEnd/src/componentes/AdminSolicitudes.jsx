@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { downloadProjectFile } from "../api/proyectService";
+
 
 export default function AdminSolicitudes() {
   const [solicitudes, setSolicitudes] = useState([]);
@@ -6,7 +9,10 @@ export default function AdminSolicitudes() {
   const [error, setError] = useState(null);
   const [filtro, setFiltro] = useState("todas"); // todas | pendientes | aceptadas
   const [proyectoSeleccionado, setProyectoSeleccionado] = useState(null);
+  const { token } = useAuth();
+  const [zoomImage, setZoomImage] = useState(null); 
 
+  
   const fetchSolicitudes = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/solicitudes/admin");
@@ -20,6 +26,8 @@ export default function AdminSolicitudes() {
       setCargando(false);
     }
   };
+
+
 
   useEffect(() => {
     fetchSolicitudes();
@@ -53,6 +61,7 @@ export default function AdminSolicitudes() {
 
   if (cargando) return <p>Cargando...</p>;
   if (error) return <p>Error: {error}</p>;
+  
 
   return (
     <>
@@ -89,6 +98,7 @@ export default function AdminSolicitudes() {
       {/* ----------------------------- LISTA DE SOLICITUDES ----------------------------- */}
       <div className="space-y-4">
         {solicitudesFiltradas.map((s) => (
+
           <div
             key={s._id}
             className="flex justify-between p-4 bg-[#0f0f13] border border-yellow-500/20 rounded-xl cursor-pointer"
@@ -105,6 +115,12 @@ export default function AdminSolicitudes() {
                 ) : (
                   <span className="text-red-400">Pendiente</span>
                 )}
+              </p>
+              {/* Contador de imagenes/Archivos*/}
+              <p className="text-sm text-gray-400 mt-1">
+                <b>Adjuntos:</b>{" "}
+                {(s.IDR_Proyecto?.imagenes?.length || 0)} imágenes y{" "}
+                {(s.IDR_Proyecto?.archivos?.length || 0)} archivos
               </p>
             </div>
 
@@ -147,7 +163,61 @@ export default function AdminSolicitudes() {
             <p><b>Nombre:</b> {proyectoSeleccionado.NombreProyecto}</p>
             <p><b>Descripción:</b> {proyectoSeleccionado.DescripcionProyecto}</p>
             <p><b>Fecha creación:</b>  {new Date(proyectoSeleccionado.FechaCreacion).toLocaleString()}</p>
+            
+            {/* IMGNS DEL PROYECTO */}
+            {Array.isArray(proyectoSeleccionado.imagenes) &&
+              proyectoSeleccionado.imagenes.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-yellow-400 text-sm mb-2">
+                    Imágenes asociadas al proyecto
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {proyectoSeleccionado.imagenes.map((img, idx) => (
+                      <img
+                        key={idx}
+                        src={img.url}
+                        alt={`Imagen ${idx + 1}`}
+                        className="w-full h-28 object-cover rounded-lg border border-yellow-500/30 cursor-pointer hover:opacity-80 transition"
+                        onClick={() => setZoomImage(img.url)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
+            {/* ARCHIVOS DEL PROYECTO */}
+            {Array.isArray(proyectoSeleccionado.archivos) &&
+              proyectoSeleccionado.archivos.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-yellow-400 text-sm mb-2">
+                    Archivos asociados al proyecto
+                  </p>
+
+                  <div className="space-y-2">
+                    {proyectoSeleccionado.archivos.map((file, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() =>
+                          downloadProjectFile(
+                            token,
+                            proyectoSeleccionado._id,
+                            idx,
+                            file.originalName
+                          )
+                        }
+                        className="flex items-center gap-2 text-sm text-yellow-300 hover:text-yellow-200 underline"
+                      >
+                        <i className="bi bi-file-earmark-arrow-down" />
+                        {file.originalName || `Archivo ${idx + 1}`}
+                        <span className="text-[10px] text-gray-400">
+                          ({file.mimeType || "archivo"})
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             <div className="mt-6 flex justify-end">
               <button
                 className="px-4 py-2 bg-yellow-500 text-black rounded hover:scale-105 transition"
@@ -156,6 +226,35 @@ export default function AdminSolicitudes() {
                 Cerrar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/*Modal con zoom para las imagenes de preview(detalle de cada proyecto)*/}         
+      {zoomImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+          onClick={() => setZoomImage(null)}
+        >
+          <div
+            className="relative max-w-3xl max-h-[90vh] mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setZoomImage(null)}
+              className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-8 h-8 
+                        flex items-center justify-center text-sm font-bold shadow-lg
+                        hover:bg-red-500 transition"
+            >
+              ✕
+            </button>
+
+            <img
+              src={zoomImage}
+              alt="Vista ampliada"
+              className="w-full max-h-[90vh] object-contain rounded-2xl border border-yellow-400/70 
+                        shadow-[0_0_30px_rgba(255,215,0,0.4)] bg-black"
+            />
           </div>
         </div>
       )}

@@ -612,7 +612,7 @@ const handleSubmit = async (e) => {
         </section>
       </div>
     </div>
-     {/*NUEVO->Modal con zoom para las imagenes de preview(detalle de cada proyecto)*/}         
+     {/*Modal con zoom para las imagenes de preview(detalle de cada proyecto)*/}         
     {zoomImage && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
