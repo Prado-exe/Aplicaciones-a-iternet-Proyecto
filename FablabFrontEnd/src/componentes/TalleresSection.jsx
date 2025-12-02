@@ -1,38 +1,58 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import "../styles/TalleresSection.css";
 
-const talleres = [
-  {
-    id: 1,
-    nombre: "Taller de Modelado 3D",
-    desc: "Aprende a diseñar y modelar piezas en 3D, desde la idea hasta el archivo para impresión.",
-    img: "https://crehana-blog.imgix.net/media/filer_public/ef/4d/ef4ddf09-2d7b-41a4-8d6c-213b5111d4eb/modelado-de-bordes.jpg?auto=format&q=50",
-  },
-  {
-    id: 2,
-    nombre: "Arduino",
-    desc: "Introducción interactiva al mundo de la electrónica y la programación con Arduino.",
-    img: "https://i0.wp.com/dronebotworkshop.com/wp-content/uploads/2023/04/dronebotworkshop-arduino-uno.png?fit=347%2C246&ssl=1",
-  },
-  {
-    id: 3,
-    nombre: "Taller de Unity",
-    desc: "Primeros pasos en el desarrollo de videojuegos y simulaciones 3D con Unity.",
-    img: "https://unity.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Ffuvbjjlp%2Fproduction%2F6d1df49565a2ad20ffa8386f1465ba52039133e3-1920x1080.png&w=3840&q=75",
-  },
-];
-
 export default function TalleresSection() {
+  const [talleres, setTalleres] = useState([]);
   const navigate = useNavigate();
 
   const handleMasTalleres = () => {
-    navigate("/pag-talleres");
+    navigate("/Pag-noticiero");
   };
+
+  useEffect(() => {
+    const fetchTalleres = async () => {
+      try {
+        // 1. Pedir TODOS los eventos
+        const eventosRes = await fetch("http://localhost:5000/api/eventos");
+        const eventos = await eventosRes.json();
+
+        // 2. Pedir la configuración de talleres
+        const cfgRes = await fetch("http://localhost:5000/api/talleres/config");
+        const cfg = await cfgRes.json();
+
+        const idsSeleccionados = cfg.config?.talleres_mostrados || [];
+
+        // 3. Filtrar solo talleres (TipoEvento === 1)
+        const soloTalleres = eventos.filter(ev => ev.TipoEvento === 1);
+
+        // 4. Filtrar solo los seleccionados en admin
+        const talleresMostrados = soloTalleres.filter(t =>
+          idsSeleccionados.includes(t._id)
+        );
+
+        // 5. Adaptar formato para el componente
+        const finalData = talleresMostrados.map(t => ({
+          id: t._id,
+          nombre: t.NombreEvento,
+          desc: t.DescripcionEvento,
+          img: t.imagen?.url || t.RutaImagenEvento || "" // prioridad cloudinary
+        }));
+
+        setTalleres(finalData);
+      } catch (err) {
+        console.error("Error al cargar los talleres destacados:", err);
+      }
+    };
+
+    fetchTalleres();
+  }, []);
 
   return (
     <section className="relative py-20 bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] text-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
+
         {/* Encabezado */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-14">
           <div className="text-center md:text-left">
@@ -50,7 +70,7 @@ export default function TalleresSection() {
           </button>
         </div>
 
-        {/* Tarjetas */}
+        {/* Cards */}
         <div className="grid gap-10 md:grid-cols-3">
           {talleres.map((taller, index) => (
             <motion.div
