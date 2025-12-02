@@ -7,6 +7,13 @@ export default function AdminCarrusel() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
 
+  const eventosPorPagina = 3;
+  const [paginaActual, setPaginaActual] = useState(1);
+
+  // ⭐ Nuevo: filtro actual
+  const [filtro, setFiltro] = useState("todos"); 
+  // valores posibles: "todos" | "futuros" | "pasados"
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -21,11 +28,16 @@ export default function AdminCarrusel() {
         const ev = await evRes.json();
         const cfg = await cfgRes.json();
 
-        setEventos(Array.isArray(ev) ? ev : []);
+        // Ordenar del más reciente al más antiguo
+        const eventosOrdenados = [...ev].sort(
+          (a, b) => new Date(b.FechaEvento) - new Date(a.FechaEvento)
+        );
+
+        setEventos(eventosOrdenados);
         setConfig(cfg.config || { cantidadMostrar: 0 });
         setSeleccionados(cfg.config?.eventos_mostrados || []);
       } catch (err) {
-        console.error("Error cargando eventos o configuración:", err);
+        console.error("Error:", err);
         setError(err.message);
       } finally {
         setCargando(false);
@@ -65,27 +77,71 @@ export default function AdminCarrusel() {
   if (cargando) return <p>Cargando...</p>;
   if (error) return <p>Error: {error}</p>;
 
+  // ⭐ APLICAR FILTROS
+  const hoy = new Date();
+
+  const eventosFiltrados = eventos.filter(ev => {
+    const fechaEv = new Date(ev.FechaEvento);
+
+    if (filtro === "futuros") return fechaEv >= hoy;
+    if (filtro === "pasados") return fechaEv < hoy;
+
+    return true; // todos
+  });
+
+  // PAGINACIÓN sobre eventos filtrados
+  const indexInicio = (paginaActual - 1) * eventosPorPagina;
+  const indexFin = indexInicio + eventosPorPagina;
+  const eventosPagina = eventosFiltrados.slice(indexInicio, indexFin);
+
+  const totalPaginas = Math.ceil(eventosFiltrados.length / eventosPorPagina);
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold text-yellow-400 mb-4">
         Configurar Carrusel
       </h2>
 
-      {Array.isArray(eventos) && eventos.map(e => (
+      {/* ⭐ SELECTOR DE FILTRO */}
+      <div className="flex gap-4 mb-4">
+        <button 
+          onClick={() => { setFiltro("todos"); setPaginaActual(1); }}
+          className={`px-4 py-2 rounded-lg font-semibold 
+            ${filtro === "todos" ? "bg-yellow-500 text-black" : "bg-gray-700 text-white"}`}
+        >
+          Todos
+        </button>
+
+        <button 
+          onClick={() => { setFiltro("futuros"); setPaginaActual(1); }}
+          className={`px-4 py-2 rounded-lg font-semibold 
+            ${filtro === "futuros" ? "bg-yellow-500 text-black" : "bg-gray-700 text-white"}`}
+        >
+          Futuros
+        </button>
+
+        <button 
+          onClick={() => { setFiltro("pasados"); setPaginaActual(1); }}
+          className={`px-4 py-2 rounded-lg font-semibold 
+            ${filtro === "pasados" ? "bg-yellow-500 text-black" : "bg-gray-700 text-white"}`}
+        >
+          Pasados
+        </button>
+      </div>
+
+      {/* LISTADO */}
+      {eventosPagina.map(e => (
         <div
           key={e._id}
           className={`flex items-start bg-[#1b1b1f] border rounded-xl p-4 shadow-md hover:shadow-lg transition
             ${seleccionados.includes(e._id) ? "border-yellow-400" : "border-yellow-500/20"}`}
         >
-          {/* Imagen a la izquierda */}
           <img
             src={e.imagen?.url}
             alt={e.NombreEvento}
             className="w-24 h-24 object-cover rounded-lg mr-4 flex-shrink-0"
           />
 
-
-          {/* Datos del evento */}
           <div className="flex-1">
             <h3 className="text-lg font-bold text-yellow-300">{e.NombreEvento}</h3>
             <p className="text-gray-400 text-sm mb-1">
@@ -99,19 +155,33 @@ export default function AdminCarrusel() {
             </p>
           </div>
 
-          {/* Checkbox */}
           <div className="ml-4 mt-2">
-            <label className="inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={seleccionados.includes(e._id)}
-                onChange={() => toggleSeleccion(e._id)}
-                className="form-checkbox h-5 w-5 text-yellow-500 rounded"
-              />
-            </label>
+            <input
+              type="checkbox"
+              checked={seleccionados.includes(e._id)}
+              onChange={() => toggleSeleccion(e._id)}
+              className="form-checkbox h-5 w-5 text-yellow-500 rounded"
+            />
           </div>
         </div>
       ))}
+
+      {/* PAGINACIÓN */}
+      <div className="flex justify-center space-x-3 mt-4">
+        {Array.from({ length: totalPaginas }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => setPaginaActual(i + 1)}
+            className={`px-3 py-1 rounded-md font-bold 
+              ${paginaActual === i + 1
+                ? "bg-yellow-500 text-black"
+                : "bg-gray-700 text-white hover:bg-gray-600"
+              }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
 
       <button
         onClick={guardar}

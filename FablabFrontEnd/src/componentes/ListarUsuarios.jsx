@@ -64,42 +64,51 @@ export default function ListarUsuarios({ onSeleccionarUsuario }) {
   return (
     <div>
       <h3 className="text-lg font-bold mb-4">Usuarios registrados</h3>
-      <table className="w-full text-left border border-yellow-500/20 rounded-xl overflow-hidden">
-        <thead className="bg-yellow-600 text-black">
-          <tr>
-            <th className="p-2">Nombre</th>
-            <th className="p-2">Email</th>
-            <th className="p-2">Rol</th>
-            <th className="p-2">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {usuarios.map((u) => (
-            <tr key={u._id} className="border-t border-yellow-500/20">
-              <td className="p-2">{u.Nickname}</td>
-              <td className="p-2">{u.CorreoUsuario}</td>
-              <td className="p-2 capitalize">{getRolTexto(u.TipoUsuario)}</td>
-
-              <td className="p-2 flex gap-2">
-                <button
-                  className="bg-blue-600 text-white px-3 py-1 rounded"
-                  onClick={() => onSeleccionarUsuario(u._id)}
-                >
-                  Ver / Editar
-                </button>
-
-                <button
-                  className="bg-red-600 text-white px-3 py-1 rounded"
-                  onClick={() => eliminarUsuario(u._id)}
-                >
-                  Eliminar
-                </button>
-              </td>
-
+      
+      {/* 1. Contenedor Responsivo para Tablas */}
+      <div className="overflow-x-auto rounded-xl border border-yellow-500/20">
+        <table className="w-full text-left">
+          
+          {/* 2. Cabecera */}
+          <thead className="bg-yellow-600 text-black whitespace-nowrap">
+            <tr>
+              <th className="p-3">Nombre</th>
+              <th className="p-3">Email</th>
+              <th className="p-3">Rol</th>
+              <th className="p-3">Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          
+          {/* 3. Cuerpo de la Tabla */}
+          <tbody>
+            {usuarios.map((u) => (
+              <tr key={u._id} className="border-t border-yellow-500/20 hover:bg-yellow-900/10 transition duration-150">
+                <td className="p-3 whitespace-nowrap">{u.Nickname}</td>
+                <td className="p-3 whitespace-nowrap">{u.CorreoUsuario}</td>
+                <td className="p-3 capitalize whitespace-nowrap">{getRolTexto(u.TipoUsuario)}</td>
+
+                {/* 4. Acciones Responsivas */}
+                <td className="p-3">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition"
+                      onClick={() => onSeleccionarUsuario(u._id)}
+                    >
+                      Ver / Editar
+                    </button>
+                    <button
+                      className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition"
+                      onClick={() => eliminarUsuario(u._id)}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
