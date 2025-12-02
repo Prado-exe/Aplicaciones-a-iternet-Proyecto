@@ -468,7 +468,7 @@ const PagMiCuenta = () => {
                   Eventos
                 </span>
                 <span className="block text-yellow-300 font-bold text-lg text-center">
-                  {user.TotalReservas ?? 0}
+                  {profile.TotalActividades ?? 0}
                 </span>
               </div>
             </div>

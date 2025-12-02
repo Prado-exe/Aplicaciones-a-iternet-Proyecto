@@ -118,6 +118,7 @@ exports.getProfile = async (userId) => {
 
   const totalProyectos = user.Proyectos?.length || 0;
   const totalSolicitudes = user.Solicitudes?.length || 0;
+  const totalActividades = user.Actividades?.length || 0; 
 
   const ultimoProyecto = totalProyectos > 0
     ? user.Proyectos[user.Proyectos.length - 1]
@@ -133,6 +134,7 @@ exports.getProfile = async (userId) => {
     ReservaMasReciente: reservaReciente ? reservaReciente.TipoSolicitud : null,
     TotalProyectos: totalProyectos,
     TotalReservas: totalSolicitudes,
+    TotalActividades: totalActividades,  
   };
 };
 

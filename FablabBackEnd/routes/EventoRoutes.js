@@ -2,8 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { crearEvento, getAllEventos,inscribirAEvento} = require("../controllers/eventoController");
 const { verificarToken } = require("../middleware/authMiddleware");
-
-
+const { upload } = require("../config/cloudinary"); 
 
 // Solo administradores
 router.post("/crear", verificarToken, (req, res, next) => {
@@ -11,7 +10,7 @@ router.post("/crear", verificarToken, (req, res, next) => {
     return res.status(403).json({ error: "No autorizado" });
   }
   next();
-}, crearEvento);
+},upload.single("imagenFile"),crearEvento);
 
 // Ruta pública para obtener todos los eventos
 router.get("/", getAllEventos);

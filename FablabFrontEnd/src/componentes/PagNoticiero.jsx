@@ -90,7 +90,7 @@ export default function PagNoticiero() {
 
               <figure className="flex-1 flex justify-center">
                 <img
-                  src={ev.RutaImagenEvento}
+                  src={ev.imagen?.url || "/no-image.png"} // Imagen unica desde la BD (Cloudinary)
                   alt={ev.NombreEvento}
                   className="rounded-xl shadow-lg w-48 h-48 object-cover"
                 />
@@ -127,7 +127,7 @@ export default function PagNoticiero() {
             </h2>
 
             <img
-              src={selectedEvento.RutaImagenEvento}
+              src={selectedEvento.imagen?.url || "/no-image.png"} // imagen unica desde la BD (Cloudinary)
               alt="Evento"
               className="rounded-xl mb-4 shadow-lg"
             />

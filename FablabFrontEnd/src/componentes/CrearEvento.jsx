@@ -6,13 +6,13 @@ export default function CrearEvento() {
     TipoEvento: 1,
     FechaEvento: "",
     DescripcionEvento: "",
-    RutaImagenEvento: "",
     CuposEventos: {
       CantidadCupos: 0,
-      IDR_Inscritos: []
+      IDR_Inscritos: [],
     },
-    Actividades: []
+    Actividades: [],
   });
+
 
   const [actividad, setActividad] = useState({
     TituloActividad: "",
@@ -21,6 +21,12 @@ export default function CrearEvento() {
 
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
+
+
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+
 
   // Manejar inputs normales
   const handleChange = (e) => {
@@ -63,7 +69,23 @@ export default function CrearEvento() {
     setError("");
   };
 
-  // Enviar evento al backend
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      return;
+    }
+
+    setImageFile(file);
+    setImagePreview({
+      url: URL.createObjectURL(file),
+      name: file.name,
+      type: file.type,
+    });
+  };
+
+
   const enviarEvento = async () => {
     setMensaje("");
     setError("");
@@ -80,13 +102,34 @@ export default function CrearEvento() {
     try {
       const token = localStorage.getItem("token");
 
+      const formToSend = new FormData();
+
+      // Campos simples 
+      formToSend.append("NombreEvento", formData.NombreEvento);
+      formToSend.append("TipoEvento", formData.TipoEvento); 
+      formToSend.append("FechaEvento", formData.FechaEvento);
+      formToSend.append("DescripcionEvento", formData.DescripcionEvento);
+
+      formToSend.append(
+        "CuposEventos",
+        JSON.stringify(formData.CuposEventos)
+      );
+      formToSend.append(
+        "Actividades",
+        JSON.stringify(formData.Actividades)
+      );
+
+      if (imageFile) {
+        formToSend.append("imagenFile", imageFile); 
+      }
+
+
       const res = await fetch("http://localhost:5000/api/eventos/crear", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: formToSend,
       });
 
       const data = await res.json();
@@ -94,6 +137,8 @@ export default function CrearEvento() {
       if (!res.ok) throw new Error(data.error || "Error al crear evento");
 
       setMensaje("✔ Evento creado con éxito");
+
+      // Reset de formulario 
       setFormData({
         NombreEvento: "",
         TipoEvento: 1,
@@ -103,11 +148,14 @@ export default function CrearEvento() {
         CuposEventos: { CantidadCupos: 0, IDR_Inscritos: [] },
         Actividades: [],
       });
-
+      setActividad({ TituloActividad: "", DescripcionActividad: "" });
+      setImageFile(null);
+      setImagePreview(null);
     } catch (err) {
       setError(err.message);
     }
   };
+
 
   return (
     <div className="bg-[#1b1b1f] p-6 rounded-2xl text-yellow-200 w-full shadow-lg border border-yellow-500/30 space-y-6">
@@ -159,13 +207,39 @@ export default function CrearEvento() {
         className="w-full p-3 rounded-lg bg-[#1a1a1d] text-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
       />
 
-      <input
-        name="RutaImagenEvento"
-        value={formData.RutaImagenEvento}
-        onChange={handleChange}
-        placeholder="URL de la imagen"
-        className="w-full p-3 rounded-lg bg-[#1a1a1d] text-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-      />
+      <div>
+        <label className="block text-sm mb-1">
+          Imagen del evento (opcional)
+        </label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="text-sm text-gray-300
+                    file:mr-2 file:px-3 file:py-2
+                    file:rounded-full file:border-0
+                    file:bg-yellow-500 file:text-black
+                    file:cursor-pointer
+                    file:font-semibold
+                    hover:file:bg-yellow-400"
+        />
+
+        {imagePreview && (
+          <div className="mt-3">
+            <p className="text-xs text-gray-400 mb-1">
+              Imagen seleccionada
+            </p>
+            <div className="w-32 rounded-xl overflow-hidden border border-yellow-500/40 bg-[#1e1e24]">
+              <img
+                src={imagePreview.url}
+                alt={imagePreview.name}
+                className="w-full h-24 object-cover"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
 
       <input
         type="number"

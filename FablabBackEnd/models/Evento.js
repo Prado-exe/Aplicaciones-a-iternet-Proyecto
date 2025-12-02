@@ -47,9 +47,10 @@ const EventoSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  RutaImagenEvento: {
-    type: String,
-    required: false
+  
+  imagen: {
+    url: { type: String },
+    publicId: { type: String },
   },
 
   CuposEventos: {
