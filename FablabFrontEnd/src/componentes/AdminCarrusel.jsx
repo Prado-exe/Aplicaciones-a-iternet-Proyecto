@@ -79,10 +79,11 @@ export default function AdminCarrusel() {
         >
           {/* Imagen a la izquierda */}
           <img
-            src={e.RutaImagenEvento}
+            src={e.imagen?.url}
             alt={e.NombreEvento}
             className="w-24 h-24 object-cover rounded-lg mr-4 flex-shrink-0"
           />
+
 
           {/* Datos del evento */}
           <div className="flex-1">

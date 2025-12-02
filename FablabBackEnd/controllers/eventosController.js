@@ -1,5 +1,6 @@
 const ConfiguracionGeneral = require("../models/ConfiguracionGeneral");
 const Evento = require("../models/Evento");
+const cloudinary = require("cloudinary").v2;
 
 // Obtener configuración de eventos y los eventos destacados
 exports.getEventosData = async (req, res) => {

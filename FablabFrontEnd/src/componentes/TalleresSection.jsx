@@ -11,21 +11,38 @@ export default function TalleresSection() {
     navigate("/Pag-noticiero");
   };
 
-  // Fetch talleres según la configuración
   useEffect(() => {
     const fetchTalleres = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/talleres/config");
-        const data = await res.json();
-        const talleresData = (data.talleres || []).map(t => ({
+        // 1. Pedir TODOS los eventos
+        const eventosRes = await fetch("http://localhost:5000/api/eventos");
+        const eventos = await eventosRes.json();
+
+        // 2. Pedir la configuración de talleres
+        const cfgRes = await fetch("http://localhost:5000/api/talleres/config");
+        const cfg = await cfgRes.json();
+
+        const idsSeleccionados = cfg.config?.talleres_mostrados || [];
+
+        // 3. Filtrar solo talleres (TipoEvento === 1)
+        const soloTalleres = eventos.filter(ev => ev.TipoEvento === 1);
+
+        // 4. Filtrar solo los seleccionados en admin
+        const talleresMostrados = soloTalleres.filter(t =>
+          idsSeleccionados.includes(t._id)
+        );
+
+        // 5. Adaptar formato para el componente
+        const finalData = talleresMostrados.map(t => ({
           id: t._id,
           nombre: t.NombreEvento,
           desc: t.DescripcionEvento,
-          img: t.RutaImagenEvento
+          img: t.imagen?.url || t.RutaImagenEvento || "" // prioridad cloudinary
         }));
-        setTalleres(talleresData);
+
+        setTalleres(finalData);
       } catch (err) {
-        console.error("Error al cargar los talleres:", err);
+        console.error("Error al cargar los talleres destacados:", err);
       }
     };
 
@@ -35,6 +52,7 @@ export default function TalleresSection() {
   return (
     <section className="relative py-20 bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] text-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
+
         {/* Encabezado */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-14">
           <div className="text-center md:text-left">
@@ -52,7 +70,7 @@ export default function TalleresSection() {
           </button>
         </div>
 
-        {/* Tarjetas */}
+        {/* Cards */}
         <div className="grid gap-10 md:grid-cols-3">
           {talleres.map((taller, index) => (
             <motion.div

@@ -1,10 +1,17 @@
 // eventoController.js
 const Evento = require("../models/Evento");
 const Usuario = require("../models/User"); // ajusta la ruta si es distinta
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_KEY,
+  api_secret: process.env.CLOUD_SECRET,
+});
+
 
 exports.crearEvento = async (req, res) => {
   try {
-    //campos que vienen del body
     const {
       NombreEvento,
       TipoEvento,
@@ -16,56 +23,55 @@ exports.crearEvento = async (req, res) => {
     let Actividades = [];
 
     if (req.body.CuposEventos) {
-      try {
-        CuposEventos = JSON.parse(req.body.CuposEventos);
-      } catch (err) {
-        console.error("Error parsing CuposEventos:", err);
-      }
+      CuposEventos = JSON.parse(req.body.CuposEventos);
     }
 
     if (req.body.Actividades) {
-      try {
-        Actividades = JSON.parse(req.body.Actividades);
-      } catch (err) {
-        console.error("Error parsing Actividades:", err);
-      }
+      Actividades = JSON.parse(req.body.Actividades);
     }
 
-    let imagen = null;
-
-    if (req.file) {
-      imagen = {
-        url: req.file.path,                     
-        publicId: req.file.filename || null,    
-      };
-    }
-
+    // VERIFICAR CUPOS
     if (!CuposEventos || typeof CuposEventos.CantidadCupos !== "number") {
       return res.status(400).json({
         error: "CuposEventos es obligatorio y debe incluir CantidadCupos",
       });
     }
 
+    // --- SUBIR IMAGEN A CLOUDINARY ---
+    let imagen = null;
+
+    if (req.file) {
+      const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        folder: "eventos",
+      });
+
+      imagen = {
+        url: uploadResult.secure_url,   // URL pública de Cloudinary
+        publicId: uploadResult.public_id, // ID para eliminar o actualizar
+      };
+    }
+
+    // Crear evento
     const nuevoEvento = new Evento({
       NombreEvento,
       TipoEvento,
       FechaEvento,
       DescripcionEvento,
-      imagen,          
-      CuposEventos,      
-      Actividades,       
+      imagen,           // ← ahora sí contiene Cloudinary
+      CuposEventos,
+      Actividades,
     });
 
     await nuevoEvento.save();
 
-    return res.status(201).json({
+    res.status(201).json({
       mensaje: "Evento creado con éxito",
       evento: nuevoEvento,
     });
-    
+
   } catch (error) {
     console.error("Error al crear evento:", error);
-    return res.status(500).json({
+    res.status(500).json({
       error: "Error interno del servidor",
     });
   }

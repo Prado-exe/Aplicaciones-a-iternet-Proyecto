@@ -80,7 +80,7 @@ export default function AdminTalleres() {
         >
           {/* Imagen a la izquierda */}
           <img
-            src={t.RutaImagenEvento}
+            src={t.imagen?.url}
             alt={t.NombreEvento}
             className="w-24 h-24 object-cover rounded-lg mr-4 flex-shrink-0"
           />

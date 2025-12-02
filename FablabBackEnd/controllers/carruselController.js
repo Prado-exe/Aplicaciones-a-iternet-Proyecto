@@ -1,5 +1,6 @@
 const ConfiguracionGeneral = require("../models/ConfiguracionGeneral");
 const Evento = require("../models/Evento");
+const cloudinary = require("cloudinary").v2;
 
 // Obtener datos del carrusel
 exports.getCarruselData = async (req, res) => {

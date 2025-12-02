@@ -8,27 +8,34 @@ export default function CarruselMain({ style }) {
   const [direction, setDirection] = useState(1);
   const intervalRef = useRef(null);
 
-  useEffect(() => {
-    const fetchSlides = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/carrusel/config");
-        const data = await res.json();
+ useEffect(() => {
+  const fetchSlides = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/carrusel/config");
+      const data = await res.json();
 
-        const slideData = data.eventos.map(e => ({
-          src: e.RutaImagenEvento,
-          tipo: "Evento",
-          titulo: e.NombreEvento,
-          descripcion: e.DescripcionEvento
-        }));
+      // Validación segura del backend
+      const eventos = Array.isArray(data.eventos) ? data.eventos : [];
 
-        setSlides(slideData);
-      } catch (err) {
-        console.error("Error al cargar el carrusel:", err);
-      }
-    };
+      const slideData = eventos
+      .filter(ev => ev && ev.imagen?.url)
+      .map(ev => ({
+        src: ev.imagen.url,
+        tipo: "Evento",
+        titulo: ev.NombreEvento || "Sin título",
+        descripcion: ev.DescripcionEvento || "Sin descripción"
+      }));
 
-    fetchSlides();
-  }, []);
+
+      setSlides(slideData);
+    } catch (err) {
+      console.error("Error al cargar el carrusel:", err);
+      setSlides([]); // evita que quede undefined
+    }
+  };
+
+  fetchSlides();
+}, []);
 
   const length = slides.length;
 

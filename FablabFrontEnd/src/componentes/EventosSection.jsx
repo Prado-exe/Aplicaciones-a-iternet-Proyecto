@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import "../styles/EventosSection.css"; // puedes mantener el mismo estilo
+import "../styles/EventosSection.css";
 
 export default function EventosSection() {
   const [eventos, setEventos] = useState([]);
@@ -11,24 +11,37 @@ export default function EventosSection() {
     navigate("/pag-noticiero");
   };
 
-  // Fetch eventos según la configuración
   useEffect(() => {
     const fetchEventos = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/eventos/config");
         const data = await res.json();
 
-        const eventosData = (data.eventos || []).map(e => ({
+        // Validar estructura mínima
+        if (!data || !Array.isArray(data.eventos)) {
+          console.warn("Formato inesperado en /api/eventos/config:", data);
+          setEventos([]);
+          return;
+        }
+
+        const eventosData = data.eventos.map(e => ({
           id: e._id,
-          titulo: e.NombreEvento,
-          desc: e.DescripcionEvento,
-          img: e.RutaImagenEvento,
-          fecha: e.FechaEvento // si quieres mostrar fecha
+          titulo: e.NombreEvento || "Evento sin título",
+          desc: e.DescripcionEvento || "Sin descripción",
+
+          img:
+            e.imagen?.url && e.imagen.url.trim() !== ""
+              ? e.imagen.url
+              : "https://placehold.co/600x400?text=Sin+Imagen",
+
+          fecha: e.FechaEvento || null
         }));
+
 
         setEventos(eventosData);
       } catch (err) {
         console.error("Error al cargar los eventos:", err);
+        setEventos([]);
       }
     };
 
@@ -38,6 +51,7 @@ export default function EventosSection() {
   return (
     <section className="relative py-20 bg-gradient-to-b from-[#0b0b0f] via-[#101114] to-[#0b0b0f] text-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
+        
         {/* Encabezado */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-14">
           <div className="text-center md:text-left">
@@ -71,11 +85,26 @@ export default function EventosSection() {
                 alt={evento.titulo}
                 className="w-full h-56 object-cover rounded-t-xl"
                 loading="lazy"
+                onError={(e) => {
+                  e.target.src =
+                    "https://placehold.co/600x400?text=Imagen+No+Disponible";
+                }}
               />
+
               <div className="p-6 text-center md:text-left">
-                <h3 className="text-xl font-bold text-yellow-300 mb-3">{evento.titulo}</h3>
-                {evento.fecha && <span className="block text-gray-400 text-sm mb-2">{evento.fecha}</span>}
-                <p className="text-gray-300 text-sm leading-relaxed">{evento.desc}</p>
+                <h3 className="text-xl font-bold text-yellow-300 mb-3">
+                  {evento.titulo}
+                </h3>
+
+                {evento.fecha && (
+                  <span className="block text-gray-400 text-sm mb-2">
+                    {evento.fecha}
+                  </span>
+                )}
+
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {evento.desc}
+                </p>
               </div>
             </motion.div>
           ))}
