@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "./componentes/Navbar";
 import UniqueDivider from "./componentes/UniqueDivider";
-import Footer from "./componentes/footbar";
+import Footer from "./componentes/Footbar";
 import BtnVolverInicio from "./componentes/BtnVolverInicio";
 import CarruselMain from "./componentes/CarruselMain";
 import EventosSection from "./componentes/EventosSection";
