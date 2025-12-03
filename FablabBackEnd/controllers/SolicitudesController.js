@@ -7,7 +7,7 @@ exports.getSolicitudes = async (req, res) => {
     const solicitudes = await Solicitud.find()
       .populate({
         path: "IDR_Proyecto",
-        select: "NombreProyecto DescripcionProyecto FechaCreacion IDR_Usuario",
+        select: "NombreProyecto DescripcionProyecto FechaCreacion IDR_Usuario imagenes archivos",
         populate: {
           path: "IDR_Usuario",
           select: "nickname nombre correo", // <-- trae el nickname

@@ -1,6 +1,5 @@
 const Evento = require("../models/Evento");
 
-// 📌 Obtener todos los eventos con sus participantes (inscritos)
 exports.getEventosConParticipantes = async (req, res) => {
   try {
     const eventos = await Evento.find()
@@ -15,7 +14,6 @@ exports.getEventosConParticipantes = async (req, res) => {
   }
 };
 
-// 📌 Obtener eventos futuros / en curso
 exports.getEventosEnCurso = async (req, res) => {
   try {
     const ahora = new Date();

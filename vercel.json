@@ -2,8 +2,8 @@
   "buildCommand": "cd FablabFrontEnd && npm run build",
   "installCommand": "npm install --prefix FablabBackEnd && npm install --prefix FablabFrontEnd",
   "outputDirectory": "FablabFrontEnd/dist",
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/catch-all.js" },
-    { "src": "/(.*)", "dest": "/FablabFrontEnd/dist/$1" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/catch-all.js" },
+    { "source": "/(.*)", "destination": "/FablabFrontEnd/dist/index.html" }
   ]
 }
