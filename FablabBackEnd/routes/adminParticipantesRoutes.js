@@ -8,8 +8,9 @@ router.get("/", adminParticipantesController.getEventosConParticipantes);
 // Obtener solo eventos en curso
 router.get("/encurso", adminParticipantesController.getEventosEnCurso);
 
-// Obtener detalle de un evento
-router.get("/:id", adminParticipantesController.getDetalleEvento);
+// ⭐ RUTA FALTANTE PARA EVENTOS PASADOS ⭐
+router.get("/pasados", adminParticipantesController.getEventosPasados); 
 
-module.exports = router;
+// Obtener detalle de un evento (Debe ir al final para no interferir con /encurso y /pasados)
+router.get("/:id", adminParticipantesController.getDetalleEvento);
 
