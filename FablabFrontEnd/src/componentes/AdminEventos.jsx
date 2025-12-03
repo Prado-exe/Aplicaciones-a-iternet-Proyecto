@@ -34,10 +34,8 @@ export default function AdminEventos() {
           ? e.filter(ev => ev.TipoEvento === 2)
           : [];
 
-        // Orden descendente por fecha
-        const ordenados = [...soloEventos].sort(
-          (a, b) => new Date(b.FechaEvento) - new Date(a.FechaEvento)
-        );
+        // ⭐ CAMBIO: ÚLTIMO CREADO PRIMERO (por _id más reciente) - NO por fecha
+        const ordenados = [...soloEventos].sort((a, b) => b._id.localeCompare(a._id));
 
         setEventos(ordenados);
         setConfig(cfg.config || { cantidadMostrar: 0 });

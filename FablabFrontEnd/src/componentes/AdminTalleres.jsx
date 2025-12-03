@@ -30,12 +30,13 @@ export default function AdminTalleres() {
 
         // Filtrar solo talleres (TipoEvento === 1)
         const soloTalleres = Array.isArray(t)
-          ? t
-              .filter(ev => ev.TipoEvento === 1)
-              .sort((a, b) => new Date(b.FechaEvento) - new Date(a.FechaEvento)) // Más recientes arriba
+          ? t.filter(ev => ev.TipoEvento === 1)
           : [];
 
-        setTalleres(soloTalleres);
+        // ⭐ CAMBIO: ÚLTIMO CREADO PRIMERO (por _id más reciente) - NO por fecha
+        const ordenados = [...soloTalleres].sort((a, b) => b._id.localeCompare(a._id));
+
+        setTalleres(ordenados);
         setConfig(cfg.config || { cantidadMostrar: 0 });
         setSeleccionados(cfg.config?.talleres_mostrados || []);
       } catch (err) {

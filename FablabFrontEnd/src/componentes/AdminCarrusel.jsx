@@ -28,10 +28,8 @@ export default function AdminCarrusel() {
         const ev = await evRes.json();
         const cfg = await cfgRes.json();
 
-        // Ordenar del más reciente al más antiguo
-        const eventosOrdenados = [...ev].sort(
-          (a, b) => new Date(b.FechaEvento) - new Date(a.FechaEvento)
-        );
+        // ⭐ CAMBIO: ÚLTIMO CREADO PRIMERO (por _id más reciente)
+        const eventosOrdenados = [...ev].sort((a, b) => b._id.localeCompare(a._id));
 
         setEventos(eventosOrdenados);
         setConfig(cfg.config || { cantidadMostrar: 0 });
