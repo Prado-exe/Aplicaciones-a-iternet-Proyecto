@@ -11,8 +11,8 @@ export default function AdminEventos() {
     const fetchData = async () => {
       try {
         const [eRes, cfgRes] = await Promise.all([
-          fetch("http://localhost:5000/api/eventos"),       // lista completa de eventos
-          fetch("http://localhost:5000/api/eventos/config") // configuración guardada
+          fetch("/api/eventos"),       // lista completa de eventos
+          fetch("/api/eventos/config") // configuración guardada
         ]);
 
         if (!eRes.ok) throw new Error(`Error eventos: ${eRes.status}`);
@@ -48,7 +48,7 @@ export default function AdminEventos() {
 
   const guardar = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/eventos/config", {
+      const res = await fetch("/api/eventos/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

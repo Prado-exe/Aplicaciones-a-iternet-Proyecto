@@ -17,7 +17,7 @@ export default function PagNoticiero() {
   const userId = localStorage.getItem("userId"); // suponer que guardas el id del usuario
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/eventos")
+    fetch("/api/eventos")
       .then((res) => res.json())
       .then((data) => setEventos(data));
   }, []);
@@ -167,7 +167,7 @@ export default function PagNoticiero() {
 
                 try {
                   const res = await fetch(
-                    `http://localhost:5000/api/eventos/${selectedEvento._id}/inscribir`,
+                    `/api/eventos/${selectedEvento._id}/inscribir`,
                     {
                       method: "POST",
                       headers: {

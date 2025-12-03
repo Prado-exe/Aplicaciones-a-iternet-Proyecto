@@ -18,7 +18,7 @@ export default function UsuarioDetalle({ userId, onVolver }) {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+        const res = await fetch(`/api/users/${userId}`, {
           headers: {
             "Authorization": `Bearer ${token}`
           }
@@ -71,7 +71,7 @@ export default function UsuarioDetalle({ userId, onVolver }) {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+      const res = await fetch(`/api/users/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -100,7 +100,7 @@ export default function UsuarioDetalle({ userId, onVolver }) {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+      const res = await fetch(`/api/users/${userId}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` },
       });

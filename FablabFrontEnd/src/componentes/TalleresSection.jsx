@@ -15,11 +15,11 @@ export default function TalleresSection() {
     const fetchTalleres = async () => {
       try {
         // 1. Pedir TODOS los eventos
-        const eventosRes = await fetch("http://localhost:5000/api/eventos");
+        const eventosRes = await fetch("/api/eventos");
         const eventos = await eventosRes.json();
 
         // 2. Pedir la configuración de talleres
-        const cfgRes = await fetch("http://localhost:5000/api/talleres/config");
+        const cfgRes = await fetch("/api/talleres/config");
         const cfg = await cfgRes.json();
 
         const idsSeleccionados = cfg.config?.talleres_mostrados || [];

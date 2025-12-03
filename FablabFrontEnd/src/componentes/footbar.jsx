@@ -1,7 +1,6 @@
 import { FaFacebook, FaTwitter, FaInstagram, FaTiktok } from "react-icons/fa";
 import Logo from "../assets/FABLABHorizaontalBlanco.svg";
 
-
 export default function Footer() {
   return (
     <footer className="relative -mt-2 bg-gradient-to-t from-black via-gray-900 to-gray-800 text-white backdrop-blur-sm">

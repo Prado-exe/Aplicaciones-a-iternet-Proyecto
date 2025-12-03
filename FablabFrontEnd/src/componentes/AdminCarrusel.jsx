@@ -11,8 +11,8 @@ export default function AdminCarrusel() {
     const fetchData = async () => {
       try {
         const [evRes, cfgRes] = await Promise.all([
-          fetch("http://localhost:5000/api/eventos"),
-          fetch("http://localhost:5000/api/carrusel/config")
+          fetch("/api/eventos"),
+          fetch("/api/carrusel/config")
         ]);
 
         if (!evRes.ok) throw new Error(`Error eventos: ${evRes.status}`);
@@ -45,7 +45,7 @@ export default function AdminCarrusel() {
 
   const guardar = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/carrusel/config", {
+      const res = await fetch("/api/carrusel/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

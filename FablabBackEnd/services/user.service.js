@@ -258,8 +258,7 @@ exports.forgotPassword = async ({ email }) => {
   await user.save(); 
 
   //Para redirigir al usuario(url)
-  const baseUrl = process.env.FRONT_URL || "http://localhost:5173";
-  const resetLink = `${baseUrl}/reset-password?token=${token}`;
+  const resetLink = `/reset-password?token=${token}`;
 
   // Enviar correo
   await transporter.sendMail({

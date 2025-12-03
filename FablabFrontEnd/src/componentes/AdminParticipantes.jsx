@@ -8,7 +8,7 @@ export default function AdminParticipantes() {
 
   const fetchEventos = async () => {
     setCargando(true);
-    let url = "http://localhost:5000/api/admin/participantes";
+    let url = "/api/admin/participantes";
 
     if (filtro === "encurso") url += "/encurso";
     else if (filtro === "pasados") url += "/pasados"; // opcional si lo agregas luego
@@ -30,7 +30,7 @@ export default function AdminParticipantes() {
 
   const abrirModal = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/participantes/${id}`);
+      const res = await fetch(`/api/admin/participantes/${id}`);
       const data = await res.json();
       setModalEvento(data);
     } catch (err) {

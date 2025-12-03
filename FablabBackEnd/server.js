@@ -9,25 +9,33 @@ const PORT = process.env.PORT || 5000;
 // Conectar a MongoDB
 connectDB();
 
-// Middleware
-const allowedOrigins = [
+// Middleware CORS
+const allowedLocalOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  "http://localhost:5173/",
-  process.env.FRONT_URL
+  "http://localhost:3000",
+  "http://127.0.0.1:3000"
 ];
 
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true); // permite curl, Postman
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } 
-    console.error("CORS blocked:", origin);
-    return callback(new Error("CORS origin no permitido"));
+    
+    // En desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      if (allowedLocalOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      console.error("CORS blocked:", origin);
+      return callback(new Error("CORS origin no permitido"));
+    }
+    
+    // En producción (Vercel) - mismo dominio
+    return callback(null, true);
   },
-  credentials: true
+  credentials: true  // ✅ permite cookies y sesiones
 }));
+
 
 app.use((req, res, next) => {
   console.log("Incoming origin:", req.headers.origin);
@@ -119,3 +127,5 @@ app.listen(PORT, () => {
   console.log(`⏰ ${new Date().toLocaleString()}`);
   console.log('=================================');
 });
+
+module.exports = app;

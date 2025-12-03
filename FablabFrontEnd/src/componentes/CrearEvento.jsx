@@ -124,7 +124,7 @@ export default function CrearEvento() {
       }
 
 
-      const res = await fetch("http://localhost:5000/api/eventos/crear", {
+      const res = await fetch("/api/eventos/crear", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

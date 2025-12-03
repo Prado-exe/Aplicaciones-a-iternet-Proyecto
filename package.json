@@ -1,0 +1,8 @@
+{
+  "name": "fablab-monorepo",
+  "private": true,
+  "scripts": {
+    "install": "npm install --prefix FablabBackEnd && npm install --prefix FablabFrontEnd",
+    "build": "cd FablabFrontEnd && npm run build"
+  }
+}

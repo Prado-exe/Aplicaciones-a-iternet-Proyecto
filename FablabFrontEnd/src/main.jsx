@@ -12,7 +12,7 @@ import { AuthProvider } from "./context/AuthContext.jsx";
 
 // 🔹 Páginas y componentes globales
 import Navbar from "./componentes/Navbar.jsx";
-import Footer from "./componentes/footbar.jsx";
+import Footer from "./componentes/Footbar.jsx";
 import BtnVolverInicio from "./componentes/BtnVolverInicio.jsx";
 import App from "./App.jsx";
 import PagQuienesSomos from "./componentes/PagQuienesSomos.jsx";

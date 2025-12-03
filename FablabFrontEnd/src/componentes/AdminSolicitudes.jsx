@@ -9,7 +9,7 @@ export default function AdminSolicitudes() {
 
   const fetchSolicitudes = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/solicitudes/admin");
+      const res = await fetch("/api/solicitudes/admin");
       if (!res.ok) throw new Error("Error al cargar solicitudes");
       const data = await res.json();
       setSolicitudes(data);
@@ -27,7 +27,7 @@ export default function AdminSolicitudes() {
 
   const actualizarEstado = async (id, estado) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/solicitudes/admin/${id}`, {
+      const res = await fetch(`/api/solicitudes/admin/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ EstadoSolicitud: estado }),

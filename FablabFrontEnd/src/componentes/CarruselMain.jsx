@@ -11,7 +11,7 @@ export default function CarruselMain({ style }) {
  useEffect(() => {
   const fetchSlides = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/carrusel/config");
+      const res = await fetch("/api/carrusel/config");
       const data = await res.json();
 
       // Validación segura del backend
