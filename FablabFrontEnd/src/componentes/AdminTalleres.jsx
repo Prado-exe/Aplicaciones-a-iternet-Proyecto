@@ -18,8 +18,8 @@ export default function AdminTalleres() {
     const fetchData = async () => {
       try {
         const [tRes, cfgRes] = await Promise.all([
-          fetch("http://localhost:5000/api/eventos"),
-          fetch("http://localhost:5000/api/talleres/config")
+          fetch("/api/eventos"),
+          fetch("/api/talleres/config")
         ]);
 
         if (!tRes.ok) throw new Error(`Error talleres: ${tRes.status}`);
@@ -60,7 +60,7 @@ export default function AdminTalleres() {
 
   const guardar = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/talleres/config", {
+      const res = await fetch("/api/talleres/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

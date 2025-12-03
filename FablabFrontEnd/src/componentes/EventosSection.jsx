@@ -14,7 +14,7 @@ export default function EventosSection() {
   useEffect(() => {
     const fetchEventos = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/eventos/config");
+        const res = await fetch("/api/eventos/config");
         const data = await res.json();
 
         // Validar estructura mínima

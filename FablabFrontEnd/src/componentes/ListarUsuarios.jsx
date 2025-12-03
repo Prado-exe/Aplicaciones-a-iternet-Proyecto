@@ -9,7 +9,7 @@ export default function ListarUsuarios({ onSeleccionarUsuario }) {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch("http://localhost:5000/api/users/listar", {
+        const res = await fetch("/api/users/listar", {
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
@@ -44,7 +44,7 @@ export default function ListarUsuarios({ onSeleccionarUsuario }) {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/users/${id}`, {
+      const res = await fetch(`/api/users/${id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`

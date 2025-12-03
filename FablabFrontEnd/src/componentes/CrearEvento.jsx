@@ -105,7 +105,7 @@ export default function CrearEvento() {
 
     try {
       // NOTA IMPORTANTE: La verificación de duplicidad debe ser manejada en el
-      // backend (http://localhost:5000/api/eventos/crear) para asegurar la unicidad.
+      // backend (/api/eventos/crear) para asegurar la unicidad.
 
       const token = localStorage.getItem("token");
       const formToSend = new FormData();
@@ -130,7 +130,7 @@ export default function CrearEvento() {
         formToSend.append("imagenFile", imageFile);
       }
 
-      const res = await fetch("http://localhost:5000/api/eventos/crear", {
+      const res = await fetch("/api/eventos/crear", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
