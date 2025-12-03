@@ -1,5 +1,5 @@
-import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
-import Logo from "../assets/logo.png";
+import { FaFacebook, FaTwitter, FaInstagram, FaTiktok } from "react-icons/fa";
+import Logo from "../assets/FABLABHorizaontalBlanco.svg";
 
 export default function Footer() {
   return (
@@ -14,7 +14,7 @@ export default function Footer() {
           <img
             src={Logo}
             alt="Logo FABLAB"
-            className="w-32 filter drop-shadow-[0_0_10px_rgba(255,215,0,0.3)] hover:drop-shadow-[0_0_15px_rgba(255,215,0,0.5)] transition duration-500"
+            className="w-48 filter drop-shadow-[0_0_10px_rgba(255,215,0,0.3)] hover:drop-shadow-[0_0_15px_rgba(255,215,0,0.5)] transition duration-500"
           />
           <p className="text-gray-400 text-sm">
             © 2025 FABLAB FIULS. Todos los derechos reservados.
@@ -24,21 +24,28 @@ export default function Footer() {
         {/* Sección derecha - Redes sociales */}
         <div className="flex space-x-8 text-2xl">
           <a
-            href="#"
+            href="https://www.facebook.com/FIULSFABLAB/"
             aria-label="Facebook"
             className="text-gray-300 hover:text-yellow-400 hover:scale-110 transition-transform duration-300"
           >
             <FaFacebook />
           </a>
           <a
-            href="#"
+            href="https://x.com/FabLabFIULS?s=20"
             aria-label="Twitter"
             className="text-gray-300 hover:text-yellow-400 hover:scale-110 transition-transform duration-300"
           >
             <FaTwitter />
           </a>
           <a
-            href="#"
+            href="https://www.tiktok.com/@fablabfiuls?is_from_webapp=1&sender_device=pc"
+            aria-label="Tiktok"
+            className="text-gray-300 hover:text-yellow-400 hover:scale-110 transition-transform duration-300"
+          >
+            <FaTiktok />
+          </a>
+          <a
+            href="https://www.instagram.com/fablabfiuls?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
             aria-label="Instagram"
             className="text-gray-300 hover:text-yellow-400 hover:scale-110 transition-transform duration-300"
           >
